@@ -142,6 +142,11 @@ phase_singbox_service() {
 phase_verify() {
   step "End-to-end verification"
 
+  if [[ "$DRY_RUN" == "1" ]]; then
+    info "[dry] skipping verify — nothing was actually installed"
+    return 0
+  fi
+
   local fails=0
 
   if svc_is_active sing-box; then
