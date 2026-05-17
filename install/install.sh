@@ -2,7 +2,7 @@
 # reality-resi-stack installer.
 #
 # Quick install:
-#   bash <(curl -fsSL https://raw.githubusercontent.com/<owner>/reality-resi-stack/v1.0.0/install/install.sh) \
+#   bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/v1.0.0/install/install.sh) \
 #     --node-name "US-Resi-01" --sni addons.mozilla.org
 #
 # Flags:
@@ -41,7 +41,7 @@ if [[ -z "$SCRIPT_PATH" || "$SCRIPT_PATH" == /dev/fd/* || "$SCRIPT_PATH" == /pro
     git -C "$REPO_DIR" reset --hard origin/main 2>/dev/null || true
   else
     rm -rf "$REPO_DIR"
-    git clone --depth 1 https://github.com/REPLACE_WITH_OWNER/reality-resi-stack.git "$REPO_DIR"
+    git clone --depth 1 https://github.com/tytsxai/reality-resi-stack.git "$REPO_DIR"
   fi
   exec bash "$REPO_DIR/install/install.sh" "$@"
 fi

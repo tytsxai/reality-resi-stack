@@ -30,7 +30,7 @@
 ## ⚡ Quick start | 一行部署
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/REPLACE_WITH_OWNER/reality-resi-stack/v1.0.0/install/install.sh) \
+bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/v1.0.0/install/install.sh) \
   --node-name "US-Resi-01" \
   --sni addons.mozilla.org \
   --with-subscription

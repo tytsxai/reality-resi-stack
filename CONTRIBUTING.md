@@ -13,7 +13,7 @@ Thanks for considering a contribution. The hard rules first.
 ## Workflow
 
 ```bash
-git clone https://github.com/REPLACE_WITH_OWNER/reality-resi-stack.git
+git clone https://github.com/tytsxai/reality-resi-stack.git
 cd reality-resi-stack
 
 # Install tooling once

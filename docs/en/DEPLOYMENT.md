@@ -52,7 +52,7 @@ Decide these before running. The installer prompts for missing values, but bundl
 ## 3. Fast path: one-line install
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/REPLACE_WITH_OWNER/reality-resi-stack/v1.0.0/install/install.sh) \
+bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/v1.0.0/install/install.sh) \
   --node-name "US-Resi-01" \
   --sni addons.mozilla.org \
   --with-subscription
@@ -91,7 +91,7 @@ bash <(curl -fsSL .../install.sh) --config /root/install.env --non-interactive
 If you want to see each step or run only a subset in a customized environment:
 
 ```bash
-git clone --depth 1 https://github.com/REPLACE_WITH_OWNER/reality-resi-stack.git /opt/reality-resi-stack
+git clone --depth 1 https://github.com/tytsxai/reality-resi-stack.git /opt/reality-resi-stack
 cd /opt/reality-resi-stack
 export REPO_ROOT="$PWD" COMMON_SH_LOADED=1
 . install/lib/common.sh

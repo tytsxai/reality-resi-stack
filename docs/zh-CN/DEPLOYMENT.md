@@ -54,7 +54,7 @@
 ## 3. 快速路径：一行安装
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/REPLACE_WITH_OWNER/reality-resi-stack/v1.0.0/install/install.sh) \
+bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/v1.0.0/install/install.sh) \
   --node-name "US-Resi-01" \
   --sni addons.mozilla.org \
   --with-subscription
@@ -93,7 +93,7 @@ bash <(curl -fsSL .../install.sh) --config /root/install.env --non-interactive
 如果你想看每一步在做什么、或在自定义环境里只想跑某几个阶段，可以 clone 仓库后直接 source 库文件再调用对应 phase 函数：
 
 ```bash
-git clone --depth 1 https://github.com/REPLACE_WITH_OWNER/reality-resi-stack.git /opt/reality-resi-stack
+git clone --depth 1 https://github.com/tytsxai/reality-resi-stack.git /opt/reality-resi-stack
 cd /opt/reality-resi-stack
 export REPO_ROOT="$PWD" COMMON_SH_LOADED=1
 . install/lib/common.sh
