@@ -35,6 +35,39 @@ phase_preflight() {
     warn "Port $INBOUND_PORT already held by sing-box (will be reconfigured in place)"
   fi
 
+  # Detect a prior MANUAL sing-box install. apt installing a second copy
+  # creates a conflicting binary + systemd unit + config dir that will
+  # silently break on next reboot. Refuse with a clear message.
+  if [[ -x /usr/local/bin/sing-box && ! -e /usr/bin/sing-box ]]; then
+    die "Detected an existing manually-installed sing-box at /usr/local/bin/sing-box.
+This installer uses the official Sagernet apt repo and would create a second,
+conflicting binary at /usr/bin/sing-box plus its own sing-box.service unit.
+Refusing to proceed.
+
+Options:
+  1. Remove the manual install first:
+       systemctl stop <your-custom-sing-box-unit>.service
+       rm /usr/local/bin/sing-box
+     Then re-run this installer.
+
+  2. Keep your existing manual install and ignore this installer for sing-box.
+     You can still use this repo's templates and subscription server manually."
+  fi
+
+  # Detect a foreign systemd unit managing sing-box under a different name.
+  local foreign_units
+  foreign_units="$(systemctl list-unit-files --type=service 2>/dev/null |
+    awk '/sing-box.*\.service/ {print $1}' |
+    grep -v '^sing-box\.service$' || true)"
+  if [[ -n "$foreign_units" ]]; then
+    die "Detected pre-existing sing-box systemd unit(s) under a non-default name:
+$foreign_units
+
+This installer manages sing-box via the default 'sing-box.service' unit.
+Running it alongside another unit would race on ports and config paths.
+Either disable/remove those units first, or do not install via this script."
+  fi
+
   local mem_kib
   mem_kib="$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)"
   if ((mem_kib < 400 * 1024)); then
