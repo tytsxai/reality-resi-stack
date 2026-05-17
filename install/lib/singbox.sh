@@ -3,7 +3,10 @@
 # render configuration, install systemd unit, run E2E verification.
 
 # shellcheck source=./common.sh
-[[ -n "${COMMON_SH_LOADED:-}" ]] || { echo "singbox.sh: source common.sh first" >&2; exit 1; }
+[[ -n "${COMMON_SH_LOADED:-}" ]] || {
+  echo "singbox.sh: source common.sh first" >&2
+  exit 1
+}
 
 # Pinned GPG fingerprint of the Sagernet apt repository signing key.
 # Verified against https://sing-box.app/gpg.key on 2026-05-17.
@@ -23,8 +26,8 @@ phase_install_singbox() {
   # Verify GPG fingerprint matches the pinned value.
   if [[ "$DRY_RUN" != "1" ]]; then
     local got
-    got="$(gpg --show-keys --with-colons /etc/apt/keyrings/sagernet.asc 2>/dev/null \
-      | awk -F: '$1=="fpr" {print $10; exit}')"
+    got="$(gpg --show-keys --with-colons /etc/apt/keyrings/sagernet.asc 2>/dev/null |
+      awk -F: '$1=="fpr" {print $10; exit}')"
     if [[ "$got" != "$SINGBOX_APT_KEY_FPR" ]]; then
       die "Sagernet GPG fingerprint mismatch. Expected $SINGBOX_APT_KEY_FPR, got $got. \
 Refusing to install — possible supply-chain tampering."
@@ -77,7 +80,7 @@ phase_generate_keys() {
   local kp pri pub
   kp="$(sing-box generate reality-keypair)"
   pri="$(awk '/PrivateKey/ {print $2}' <<<"$kp")"
-  pub="$(awk '/PublicKey/ {print $2}'  <<<"$kp")"
+  pub="$(awk '/PublicKey/ {print $2}' <<<"$kp")"
   [[ -n "$pri" && -n "$pub" ]] || die "Reality keypair generation failed"
   REALITY_PRIVATE_KEY="$pri"
   REALITY_PUBLIC_KEY="$pub"
@@ -88,10 +91,10 @@ phase_generate_keys() {
   {
     printf 'UUID=%s\n' "$UUID"
     printf 'REALITY_PRIVATE_KEY=%s\n' "$REALITY_PRIVATE_KEY"
-    printf 'REALITY_PUBLIC_KEY=%s\n'  "$REALITY_PUBLIC_KEY"
-    printf 'SUB_TOKEN=%s\n'           "$SUB_TOKEN"
-    printf 'SHORT_ID=%s\n'            "$SHORT_ID"
-  } > "$secrets"
+    printf 'REALITY_PUBLIC_KEY=%s\n' "$REALITY_PUBLIC_KEY"
+    printf 'SUB_TOKEN=%s\n' "$SUB_TOKEN"
+    printf 'SHORT_ID=%s\n' "$SHORT_ID"
+  } >"$secrets"
   chmod 600 "$secrets"
   ok "Secrets written to $secrets (mode 600)"
 
@@ -109,11 +112,11 @@ phase_configure_singbox() {
   run mkdir -p "$conf" /etc/sing-box/logs
 
   local tpl="$REPO_ROOT/templates/singbox"
-  run cp "$tpl/00_log.json"       "$conf/00_log.json"
+  run cp "$tpl/00_log.json" "$conf/00_log.json"
   run cp "$tpl/01_outbounds.json" "$conf/01_outbounds.json"
-  run cp "$tpl/03_route.json"     "$conf/03_route.json"
-  run cp "$tpl/05_dns.json"       "$conf/05_dns.json"
-  run cp "$tpl/06_ntp.json"       "$conf/06_ntp.json"
+  run cp "$tpl/03_route.json" "$conf/03_route.json"
+  run cp "$tpl/05_dns.json" "$conf/05_dns.json"
+  run cp "$tpl/06_ntp.json" "$conf/06_ntp.json"
 
   render_template \
     "$tpl/11_xtls-reality_inbounds.json.tmpl" \
@@ -130,7 +133,7 @@ phase_configure_singbox() {
 phase_singbox_service() {
   step "Installing sing-box systemd unit"
   run cp "$REPO_ROOT/templates/systemd/sing-box.service" \
-         /etc/systemd/system/sing-box.service
+    /etc/systemd/system/sing-box.service
   svc_enable_now sing-box
   ok "sing-box service enabled"
 }
@@ -144,27 +147,30 @@ phase_verify() {
   if svc_is_active sing-box; then
     ok "sing-box is active"
   else
-    fail "sing-box not active"; fails=$((fails+1))
+    fail "sing-box not active"
+    fails=$((fails + 1))
   fi
 
   if ss -tlnp 2>/dev/null | grep -q ":${INBOUND_PORT} "; then
     ok "Listening on tcp/${INBOUND_PORT}"
   else
-    fail "Not listening on tcp/${INBOUND_PORT}"; fails=$((fails+1))
+    fail "Not listening on tcp/${INBOUND_PORT}"
+    fails=$((fails + 1))
   fi
 
   if sing-box check -C /etc/sing-box/conf >/dev/null 2>&1; then
     ok "sing-box check OK"
   else
-    fail "sing-box check failed"; fails=$((fails+1))
+    fail "sing-box check failed"
+    fails=$((fails + 1))
   fi
 
   # TLS handshake self-test — confirms Reality is fronting the configured SNI.
   if command -v openssl >/dev/null 2>&1; then
     if echo | timeout 5 openssl s_client \
-         -connect "127.0.0.1:${INBOUND_PORT}" \
-         -servername "${SNI}" -verify_quiet 2>/dev/null \
-         | grep -q "subject="; then
+      -connect "127.0.0.1:${INBOUND_PORT}" \
+      -servername "${SNI}" -verify_quiet 2>/dev/null |
+      grep -q "subject="; then
       ok "TLS handshake to 127.0.0.1:${INBOUND_PORT} produced a certificate (Reality fronting works)"
     else
       warn "TLS self-handshake produced no cert — Reality may still be OK; verify from a real client"
@@ -175,11 +181,12 @@ phase_verify() {
     if curl -fsS "http://127.0.0.1/healthz" >/dev/null 2>&1; then
       ok "Subscription /healthz responds"
     else
-      fail "Subscription /healthz does not respond"; fails=$((fails+1))
+      fail "Subscription /healthz does not respond"
+      fails=$((fails + 1))
     fi
   fi
 
-  if (( fails > 0 )); then
+  if ((fails > 0)); then
     die "Verification: $fails check(s) failed"
   fi
   ok "All verification checks passed"

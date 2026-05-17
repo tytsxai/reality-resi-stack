@@ -3,7 +3,10 @@
 # Idempotent. Source this file; do not execute directly.
 
 # shellcheck source=./common.sh
-[[ -n "${COMMON_SH_LOADED:-}" ]] || { echo "system.sh: source common.sh first" >&2; exit 1; }
+[[ -n "${COMMON_SH_LOADED:-}" ]] || {
+  echo "system.sh: source common.sh first" >&2
+  exit 1
+}
 
 # ── Preflight ────────────────────────────────────────────────────────────
 phase_preflight() {
@@ -17,7 +20,7 @@ phase_preflight() {
   # shellcheck source=/dev/null
   . /etc/os-release
   case "${ID:-}" in
-    ubuntu|debian) ok "OS: ${PRETTY_NAME:-$ID}" ;;
+    ubuntu | debian) ok "OS: ${PRETTY_NAME:-$ID}" ;;
     *) die "Unsupported OS (${ID:-?}). Supported: Ubuntu 22.04+, Debian 12+." ;;
   esac
 
@@ -34,7 +37,7 @@ phase_preflight() {
 
   local mem_kib
   mem_kib="$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)"
-  if (( mem_kib < 400 * 1024 )); then
+  if ((mem_kib < 400 * 1024)); then
     warn "Low RAM (${mem_kib} kiB). 512 MiB+ recommended; swap will be added."
   fi
 

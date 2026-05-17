@@ -19,25 +19,35 @@ KEEP_BACKUPS=1
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --purge-secrets) KEEP_SECRETS=0; shift ;;
-    --purge-backups) KEEP_BACKUPS=0; shift ;;
-    --purge-all)     KEEP_SECRETS=0; KEEP_BACKUPS=0; shift ;;
+    --purge-secrets)
+      KEEP_SECRETS=0
+      shift
+      ;;
+    --purge-backups)
+      KEEP_BACKUPS=0
+      shift
+      ;;
+    --purge-all)
+      KEEP_SECRETS=0
+      KEEP_BACKUPS=0
+      shift
+      ;;
     *) die "Unknown arg: $1" ;;
   esac
 done
 
 step "Stopping and disabling services"
 for svc in sing-box subscription-leaf subscription-aggregator \
-           reality-resi-stack-backup.timer; do
+  reality-resi-stack-backup.timer; do
   systemctl is-enabled --quiet "$svc" 2>/dev/null && run systemctl disable --now "$svc" || true
 done
 
 step "Removing systemd units"
 for unit in sing-box.service \
-            subscription-leaf.service \
-            subscription-aggregator.service \
-            reality-resi-stack-backup.service \
-            reality-resi-stack-backup.timer; do
+  subscription-leaf.service \
+  subscription-aggregator.service \
+  reality-resi-stack-backup.service \
+  reality-resi-stack-backup.timer; do
   [[ -f "/etc/systemd/system/$unit" ]] && run rm -f "/etc/systemd/system/$unit"
 done
 run systemctl daemon-reload

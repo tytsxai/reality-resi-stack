@@ -12,7 +12,7 @@ C_RED=$'\033[1;31m'
 C_GRAY=$'\033[0;90m'
 
 step() { printf "\n%s>> %s%s\n" "$C_CYAN" "$*" "$C_RESET"; }
-ok()   { printf "%s   ✔ %s%s\n" "$C_GREEN" "$*" "$C_RESET"; }
+ok() { printf "%s   ✔ %s%s\n" "$C_GREEN" "$*" "$C_RESET"; }
 warn() { printf "%s   ⚠ %s%s\n" "$C_YELLOW" "$*" "$C_RESET"; }
 fail() { printf "%s   ✘ %s%s\n" "$C_RED" "$*" "$C_RESET" >&2; }
 info() { printf "%s   %s%s\n" "$C_GRAY" "$*" "$C_RESET"; }
@@ -54,7 +54,7 @@ write_file() {
   mkdir -p "$(dirname "$path")"
   local tmp
   tmp="$(mktemp)"
-  cat > "$tmp"
+  cat >"$tmp"
   chmod "$mode" "$tmp"
   mv "$tmp" "$path"
 }
@@ -66,7 +66,7 @@ retry() {
   local n=0
   until "$@"; do
     n=$((n + 1))
-    if (( n >= tries )); then
+    if ((n >= tries)); then
       fail "command failed after $n attempts: $*"
       return 1
     fi
@@ -126,7 +126,7 @@ ensure_line() {
   fi
   mkdir -p "$(dirname "$file")"
   touch "$file"
-  grep -qF -- "$line" "$file" || printf '%s\n' "$line" >> "$file"
+  grep -qF -- "$line" "$file" || printf '%s\n' "$line" >>"$file"
 }
 
 # pkg_installed <name>

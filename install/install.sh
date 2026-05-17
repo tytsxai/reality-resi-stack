@@ -87,22 +87,71 @@ print_help() { sed -n '/^# reality-resi-stack installer\./,/^set -Eeuo/{ /^set -
 # ── Argument parsing ─────────────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --node-name) NODE_NAME="$2"; shift 2 ;;
-    --sni) SNI="$2"; shift 2 ;;
-    --inbound-port) INBOUND_PORT="$2"; shift 2 ;;
-    --ssh-port) SSH_PORT="$2"; shift 2 ;;
-    --timezone) TIMEZONE="$2"; shift 2 ;;
-    --interface) INTERFACE="$2"; shift 2 ;;
-    --total-bytes) TOTAL_BYTES="$2"; shift 2 ;;
-    --with-subscription) WITH_SUBSCRIPTION=1; shift ;;
-    --with-aggregator) WITH_AGGREGATOR=1; REMOTE_STATUS_URL="$2"; shift 2 ;;
-    --harden-ssh) HARDEN_SSH=1; shift ;;
-    --singbox-version) SINGBOX_VERSION="$2"; shift 2 ;;
-    --dry-run) DRY_RUN=1; shift ;;
-    --non-interactive) NON_INTERACTIVE=1; shift ;;
-    --config) CONFIG_FILE="$2"; shift 2 ;;
-    --uninstall) DO_UNINSTALL=1; shift ;;
-    -h|--help) print_help; exit 0 ;;
+    --node-name)
+      NODE_NAME="$2"
+      shift 2
+      ;;
+    --sni)
+      SNI="$2"
+      shift 2
+      ;;
+    --inbound-port)
+      INBOUND_PORT="$2"
+      shift 2
+      ;;
+    --ssh-port)
+      SSH_PORT="$2"
+      shift 2
+      ;;
+    --timezone)
+      TIMEZONE="$2"
+      shift 2
+      ;;
+    --interface)
+      INTERFACE="$2"
+      shift 2
+      ;;
+    --total-bytes)
+      TOTAL_BYTES="$2"
+      shift 2
+      ;;
+    --with-subscription)
+      WITH_SUBSCRIPTION=1
+      shift
+      ;;
+    --with-aggregator)
+      WITH_AGGREGATOR=1
+      REMOTE_STATUS_URL="$2"
+      shift 2
+      ;;
+    --harden-ssh)
+      HARDEN_SSH=1
+      shift
+      ;;
+    --singbox-version)
+      SINGBOX_VERSION="$2"
+      shift 2
+      ;;
+    --dry-run)
+      DRY_RUN=1
+      shift
+      ;;
+    --non-interactive)
+      NON_INTERACTIVE=1
+      shift
+      ;;
+    --config)
+      CONFIG_FILE="$2"
+      shift 2
+      ;;
+    --uninstall)
+      DO_UNINSTALL=1
+      shift
+      ;;
+    -h | --help)
+      print_help
+      exit 0
+      ;;
     *) die "Unknown arg: $1 (try --help)" ;;
   esac
 done
@@ -140,8 +189,8 @@ if [[ -z "$SERVER_IP" ]]; then
   warn "Could not auto-detect public IP. Set SERVER_IP=… or --config to render client profile."
 fi
 export SERVER_IP NODE_NAME SNI INBOUND_PORT SSH_PORT TIMEZONE INTERFACE \
-       TOTAL_BYTES EXPIRE_TS USAGE_OFFSET_BYTES WITH_SUBSCRIPTION WITH_AGGREGATOR \
-       REMOTE_STATUS_URL HARDEN_SSH SINGBOX_VERSION
+  TOTAL_BYTES EXPIRE_TS USAGE_OFFSET_BYTES WITH_SUBSCRIPTION WITH_AGGREGATOR \
+  REMOTE_STATUS_URL HARDEN_SSH SINGBOX_VERSION
 
 # ── Run phases ───────────────────────────────────────────────────────────
 phase_preflight

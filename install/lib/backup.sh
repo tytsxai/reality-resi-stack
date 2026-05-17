@@ -3,7 +3,10 @@
 # (NOT logs, NOT secrets, NOT runtime state).
 
 # shellcheck source=./common.sh
-[[ -n "${COMMON_SH_LOADED:-}" ]] || { echo "backup.sh: source common.sh first" >&2; exit 1; }
+[[ -n "${COMMON_SH_LOADED:-}" ]] || {
+  echo "backup.sh: source common.sh first" >&2
+  exit 1
+}
 
 phase_backup() {
   step "Installing daily config backup timer"
@@ -51,9 +54,9 @@ echo "$OUT"
 EOF
 
   run cp "$REPO_ROOT/templates/systemd/config-backup.service" \
-         /etc/systemd/system/reality-resi-stack-backup.service
+    /etc/systemd/system/reality-resi-stack-backup.service
   run cp "$REPO_ROOT/templates/systemd/config-backup.timer" \
-         /etc/systemd/system/reality-resi-stack-backup.timer
+    /etc/systemd/system/reality-resi-stack-backup.timer
   run systemctl daemon-reload
   run systemctl enable --now reality-resi-stack-backup.timer
   ok "Backup timer installed"

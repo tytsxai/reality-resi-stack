@@ -73,7 +73,7 @@ fail() {
   fail_count=$((fail_count + 1))
 }
 warn() { printf "%s[WARN]%s %s\n" "$C_YELLOW" "$C_RESET" "$*" >&2; }
-ok()   { printf "%s[OK]%s   %s\n" "$C_GREEN" "$C_RESET" "$*"; }
+ok() { printf "%s[OK]%s   %s\n" "$C_GREEN" "$C_RESET" "$*"; }
 info() { printf "%s\n" "$*"; }
 
 if [[ $# -gt 0 ]]; then
@@ -109,11 +109,11 @@ is_allowlisted_hash() {
 DENY_HASHES=()
 while IFS= read -r line; do
   case "$line" in
-    ''|\#*) continue ;;
+    '' | \#*) continue ;;
   esac
   hash="$(printf '%s' "$line" | awk '{print $1}')"
   [[ -n "$hash" ]] && DENY_HASHES+=("$hash")
-done < "$DENYLIST"
+done <"$DENYLIST"
 
 if [[ ${#DENY_HASHES[@]} -eq 0 ]]; then
   warn "Denylist is empty: $DENYLIST"
@@ -156,8 +156,8 @@ for root in "${SCAN_ROOTS[@]}"; do
   done < <(
     find "$root" \
       \( -name .git -o -name node_modules -o -name _site \
-         -o -name .jekyll-cache -o -name __pycache__ \
-         -o -name .ruff_cache -o -name vendor \) -prune \
+      -o -name .jekyll-cache -o -name __pycache__ \
+      -o -name .ruff_cache -o -name vendor \) -prune \
       -o -type f -print0
   )
 done

@@ -3,7 +3,10 @@
 # the aggregator server (when --with-aggregator REMOTE_STATUS_URL is set).
 
 # shellcheck source=./common.sh
-[[ -n "${COMMON_SH_LOADED:-}" ]] || { echo "subscription.sh: source common.sh first" >&2; exit 1; }
+[[ -n "${COMMON_SH_LOADED:-}" ]] || {
+  echo "subscription.sh: source common.sh first" >&2
+  exit 1
+}
 
 INSTALL_LIB_DIR=/usr/local/lib/reality-resi-stack
 ENV_DIR=/etc/reality-resi-stack
@@ -20,7 +23,7 @@ phase_subscription_leaf() {
   run mkdir -p "$INSTALL_LIB_DIR" "$ENV_DIR" "$PROFILE_DIR" "$STATE_DIR"
 
   run cp "$REPO_ROOT/subscription/leaf_server.py" \
-         "$INSTALL_LIB_DIR/leaf_server.py"
+    "$INSTALL_LIB_DIR/leaf_server.py"
 
   write_file "$ENV_DIR/subscription-leaf.env" 0600 <<EOF
 HOST=0.0.0.0
@@ -39,10 +42,10 @@ EOF
 
   # Render a Clash profile and drop it as the default served file.
   render_template "$REPO_ROOT/templates/clash/client-single.yaml.tmpl" \
-                  "$PROFILE_DIR/profile.yaml" 0644
+    "$PROFILE_DIR/profile.yaml" 0644
 
   run cp "$REPO_ROOT/templates/systemd/subscription-leaf.service" \
-         /etc/systemd/system/subscription-leaf.service
+    /etc/systemd/system/subscription-leaf.service
 
   svc_enable_now subscription-leaf
   ok "Subscription leaf running on :80, token=$SUB_TOKEN"
@@ -56,7 +59,7 @@ phase_subscription_aggregator() {
   run mkdir -p "$INSTALL_LIB_DIR" "$ENV_DIR" "$PROFILE_DIR" "$STATE_DIR"
 
   run cp "$REPO_ROOT/subscription/aggregator_server.py" \
-         "$INSTALL_LIB_DIR/aggregator_server.py"
+    "$INSTALL_LIB_DIR/aggregator_server.py"
 
   write_file "$ENV_DIR/subscription-aggregator.env" 0600 <<EOF
 HOST=0.0.0.0
@@ -76,10 +79,10 @@ EOF
 
   # Render the dual-node Clash profile with smart routing (TG → DC, OpenAI → Resi).
   render_template "$REPO_ROOT/templates/clash/client-dual.yaml.tmpl" \
-                  "$PROFILE_DIR/profile.yaml" 0644
+    "$PROFILE_DIR/profile.yaml" 0644
 
   run cp "$REPO_ROOT/templates/systemd/subscription-aggregator.service" \
-         /etc/systemd/system/subscription-aggregator.service
+    /etc/systemd/system/subscription-aggregator.service
 
   svc_enable_now subscription-aggregator
   ok "Subscription aggregator running on :80, polling $REMOTE_STATUS_URL"
