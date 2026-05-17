@@ -8,10 +8,13 @@
   exit 1
 }
 
-# Pinned GPG fingerprint of the Sagernet apt repository signing key.
-# Verified against https://sing-box.app/gpg.key on 2026-05-17.
-# CI bumps this when the upstream key rotates.
-SINGBOX_APT_KEY_FPR="${SINGBOX_APT_KEY_FPR:-7338974F88D62E8DC59D9D7B3FAFC1AD51F02C50}"
+# Pinned GPG fingerprints of the Sagernet apt repository signing key bundle.
+# Verified against https://sing-box.app/gpg.key on 2026-05-17 — the bundle
+# contains a primary key plus a signing subkey, both with their own fingerprint.
+# We require the EXPECTED fingerprint to be present anywhere in the bundle
+# (not just first), so upstream subkey rotation does not break us.
+# Override with SINGBOX_APT_KEY_FPR=<fpr> if you've pinned a newer rotation.
+SINGBOX_APT_KEY_FPR="${SINGBOX_APT_KEY_FPR:-2C317FBD5D886B4E89BAE8DA6D9152172A2B2F0C}"
 
 # ── Install sing-box from official apt repo ──────────────────────────────
 phase_install_singbox() {
@@ -23,16 +26,20 @@ phase_install_singbox() {
     run chmod a+r /etc/apt/keyrings/sagernet.asc
   fi
 
-  # Verify GPG fingerprint matches the pinned value.
+  # Verify the expected fingerprint is in the bundle.
   if [[ "$DRY_RUN" != "1" ]]; then
-    local got
-    got="$(gpg --show-keys --with-colons /etc/apt/keyrings/sagernet.asc 2>/dev/null |
-      awk -F: '$1=="fpr" {print $10; exit}')"
-    if [[ "$got" != "$SINGBOX_APT_KEY_FPR" ]]; then
-      die "Sagernet GPG fingerprint mismatch. Expected $SINGBOX_APT_KEY_FPR, got $got. \
-Refusing to install — possible supply-chain tampering."
+    local all_fprs
+    all_fprs="$(gpg --show-keys --with-colons /etc/apt/keyrings/sagernet.asc 2>/dev/null |
+      awk -F: '$1=="fpr" {print $10}')"
+    if ! grep -qxF "$SINGBOX_APT_KEY_FPR" <<<"$all_fprs"; then
+      die "Sagernet GPG fingerprint mismatch.
+Expected (any of): $SINGBOX_APT_KEY_FPR
+Got bundle fingerprints:
+$all_fprs
+Refusing to install — possible supply-chain tampering. If Sagernet has rotated keys,
+re-pin via: SINGBOX_APT_KEY_FPR=<new-fpr> bash install/install.sh ..."
     fi
-    ok "GPG fingerprint verified: $got"
+    ok "GPG fingerprint verified: $SINGBOX_APT_KEY_FPR present in bundle"
   fi
 
   write_file /etc/apt/sources.list.d/sagernet.sources 0644 <<'EOF'
