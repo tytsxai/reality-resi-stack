@@ -1,0 +1,11 @@
+{
+  "dns": {
+    "servers": [
+      {
+        "type": "local",
+        "prefer_go": false
+      }
+    ],
+    "strategy": "ipv4_only"
+  }
+}

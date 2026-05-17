@@ -1,0 +1,17 @@
+[project]
+name = "reality-resi-stack-subscription"
+version = "1.0.0"
+description = "Subscription leaf + aggregator HTTP servers for reality-resi-stack."
+requires-python = ">=3.10"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B", "C4", "SIM"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+# urllib.urlopen is intentional — we have no third-party deps by design.
+"aggregator_server.py" = ["S310"]

@@ -1,0 +1,122 @@
+# Dual-node Clash profile with residential-vs-datacenter smart routing.
+#
+# Why this layout:
+#   Premium residential egress IPs (your Example-Resi-01) are gold for
+#   services that reward "real-home-user" reputation: OpenAI, ChatGPT, Claude,
+#   Google AI, banks, Netflix region detection.
+#
+#   But the SAME residential IPs often live in subnets that Telegram, Discord,
+#   and similar messengers downrank because the subnet has hosted bot abuse
+#   from other tenants. Symptom: file uploads stall, voice quality drops,
+#   "sending..." stuck.
+#
+#   The default rules below route the residential node to the services that
+#   reward it, and route messenger / general traffic to your data-center
+#   backup (Example-DC-01), which has cleaner messenger reputation.
+
+port: 7890
+socks-port: 7891
+allow-lan: false
+mode: rule
+log-level: info
+unified-delay: true
+
+proxies:
+  - name: Example-Resi-01
+    type: vless
+    server: 203.0.113.10
+    port: 443
+    uuid: 00000000-0000-0000-0000-000000000000
+    network: tcp
+    udp: true
+    tls: true
+    flow: xtls-rprx-vision
+    servername: addons.mozilla.org
+    client-fingerprint: chrome
+    reality-opts:
+      public-key: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+      short-id: ""
+
+  - name: Example-DC-01
+    type: vless
+    server: 198.51.100.20
+    port: 443
+    uuid: 11111111-1111-1111-1111-111111111111
+    network: tcp
+    udp: true
+    tls: true
+    flow: xtls-rprx-vision
+    servername: addons.mozilla.org
+    client-fingerprint: chrome
+    reality-opts:
+      public-key: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+      short-id: ""
+
+proxy-groups:
+  - name: RESI
+    type: select
+    proxies:
+      - Example-Resi-01
+      - Example-DC-01
+
+  - name: DC
+    type: select
+    proxies:
+      - Example-DC-01
+      - Example-Resi-01
+
+  - name: AUTO
+    type: url-test
+    proxies:
+      - Example-Resi-01
+      - Example-DC-01
+    url: https://www.gstatic.com/generate_204
+    interval: 300
+    lazy: false
+
+  - name: GLOBAL
+    type: select
+    proxies:
+      - AUTO
+      - RESI
+      - DC
+
+rules:
+  # ── Residential IP is the asset → route here ─────────────────────────
+  - DOMAIN-SUFFIX,openai.com,RESI
+  - DOMAIN-SUFFIX,chatgpt.com,RESI
+  - DOMAIN-SUFFIX,oaistatic.com,RESI
+  - DOMAIN-SUFFIX,oaiusercontent.com,RESI
+  - DOMAIN-SUFFIX,anthropic.com,RESI
+  - DOMAIN-SUFFIX,claude.ai,RESI
+  - DOMAIN-SUFFIX,googleapis.com,RESI
+  - DOMAIN-SUFFIX,gemini.google.com,RESI
+  - DOMAIN-SUFFIX,bard.google.com,RESI
+  - DOMAIN-SUFFIX,netflix.com,RESI
+  - DOMAIN-SUFFIX,nflxvideo.net,RESI
+
+  # ── Residential IPs often soft-throttled here → route to DC ──────────
+  - DOMAIN-SUFFIX,telegram.org,DC
+  - DOMAIN-SUFFIX,t.me,DC
+  - DOMAIN-SUFFIX,telegram.me,DC
+  - DOMAIN-SUFFIX,tdesktop.com,DC
+  - DOMAIN-SUFFIX,telesco.pe,DC
+  - DOMAIN-SUFFIX,cdn-telegram.org,DC
+  - IP-CIDR,91.108.4.0/22,DC,no-resolve
+  - IP-CIDR,91.108.8.0/22,DC,no-resolve
+  - IP-CIDR,91.108.12.0/22,DC,no-resolve
+  - IP-CIDR,91.108.16.0/22,DC,no-resolve
+  - IP-CIDR,91.108.20.0/22,DC,no-resolve
+  - IP-CIDR,91.108.56.0/22,DC,no-resolve
+  - IP-CIDR,149.154.160.0/20,DC,no-resolve
+
+  - DOMAIN-SUFFIX,discord.com,DC
+  - DOMAIN-SUFFIX,discord.gg,DC
+  - DOMAIN-SUFFIX,discordapp.com,DC
+  - DOMAIN-SUFFIX,discordapp.net,DC
+  - DOMAIN-SUFFIX,discord.media,DC
+
+  # ── Local / sensible defaults ────────────────────────────────────────
+  - GEOSITE,CN,DIRECT
+  - GEOIP,CN,DIRECT,no-resolve
+  - MATCH,AUTO

@@ -1,0 +1,15 @@
+[Unit]
+Description=Reality residential subscription leaf service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/reality-resi-stack/subscription-leaf.env
+ExecStart=/usr/bin/python3 /usr/local/lib/reality-resi-stack/leaf_server.py
+Restart=always
+RestartSec=3
+WorkingDirectory=/usr/local/lib/reality-resi-stack
+
+[Install]
+WantedBy=multi-user.target

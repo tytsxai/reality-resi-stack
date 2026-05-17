@@ -1,0 +1,42 @@
+port: 7890
+socks-port: 7891
+allow-lan: false
+mode: rule
+log-level: info
+unified-delay: true
+
+proxies:
+  - name: Example-Resi-01
+    type: vless
+    server: 203.0.113.10
+    port: 443
+    uuid: 00000000-0000-0000-0000-000000000000
+    network: tcp
+    udp: true
+    tls: true
+    flow: xtls-rprx-vision
+    servername: addons.mozilla.org
+    client-fingerprint: chrome
+    reality-opts:
+      public-key: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+      short-id: ""
+
+proxy-groups:
+  - name: PROXY
+    type: url-test
+    proxies:
+      - Example-Resi-01
+    url: https://api.openai.com/v1/models
+    expected-status: 401
+    interval: 300
+    lazy: false
+
+  - name: GLOBAL
+    type: select
+    proxies:
+      - PROXY
+
+rules:
+  - GEOSITE,CN,DIRECT
+  - GEOIP,CN,DIRECT,no-resolve
+  - MATCH,PROXY
