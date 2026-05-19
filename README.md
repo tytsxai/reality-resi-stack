@@ -159,3 +159,7 @@ PRs welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) first — lint gates are st
 ## 📜 License
 
 GPL-3.0. See [LICENSE](LICENSE).
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=tytsxai/reality-resi-stack&type=Date)](https://www.star-history.com/#tytsxai/reality-resi-stack&Date)
