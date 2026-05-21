@@ -90,7 +90,8 @@ def load_state() -> dict:
         return {}
     try:
         return json.loads(STATE_FILE.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    except (OSError, json.JSONDecodeError) as exc:
+        log.warning("load_state(%s) failed: %s — reinitializing accounting state", STATE_FILE, exc)
         return {}
 
 
@@ -122,10 +123,10 @@ def update_usage_state() -> int:
                 "boot_id": current_boot,
                 "last_total": current_total,
                 "month": month_key,
-                "used_bytes": current_total,
+                "used_bytes": 0,
             }
             save_state(state)
-            return int(state["used_bytes"])
+            return 0
 
         if state.get("month") != month_key:
             state = {
@@ -141,9 +142,13 @@ def update_usage_state() -> int:
         used_bytes = int(state.get("used_bytes", 0))
         last_boot = state.get("boot_id", "")
 
-        # Same boot, counter has not wrapped → add the delta.
+        # Same boot, counter has not wrapped: add only the delta.
         if current_boot == last_boot and current_total >= last_total:
             used_bytes += current_total - last_total
+        else:
+            # Reboot, counter rollover, or restored state: kernel counters
+            # restarted from a lower baseline, so count the current boot total.
+            used_bytes += current_total
 
         state["boot_id"] = current_boot
         state["last_total"] = current_total

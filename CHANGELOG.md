@@ -7,6 +7,23 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Leaf subscription accounting now treats the first NIC sample as a baseline (`used_bytes=0`) and uses `USAGE_OFFSET_BYTES` for historical calibration, preventing fresh installs from reporting all pre-existing host traffic as proxy usage.
+- Leaf accounting now carries usage forward across reboots or NIC counter rollovers by adding the new boot's current counter instead of silently dropping it.
+- Re-running the installer with an existing `secrets.env` re-exports the reused UUID, Reality keys, subscription token, and short ID before rendering templates.
+- `--with-subscription` and `--with-aggregator` are now mutually exclusive, and aggregator installs fail early unless the residential-node template variables are provided.
+
+### Added
+
+- `REALITY_RESI_STACK_REF` lets remote-piped installs fetch a specific branch or tag while defaulting to `main`.
+- Standard-library `unittest` coverage for leaf accounting and aggregator cache fallback, wired into `make test` and GitHub Actions.
+
+### Security
+
+- Subscription systemd units now use basic sandboxing (`NoNewPrivileges`, `PrivateTmp`, `ProtectHome`, `ProtectSystem=strict`) and only keep `/var/lib/reality-resi-stack` writable.
+- Config backups now exclude runtime usage/cache state, set backup directory permissions to `700`, and write archives as `600`.
+
 ## [1.0.3] — 2026-05-19
 
 ### Added (Documentation)
@@ -70,7 +87,6 @@ Initial release. **Withdrawn** — see 1.0.1 changelog for the install-blocking 
 - Additional translations (Farsi, Russian, Arabic, Vietnamese, Turkish, Indonesian, Burmese, Spanish — based on issue requests)
 - GitHub Pages site with proper sitemap + hreflang
 - Asciinema cast of the installer flow
-- pytest harness for subscription servers (cache rollover, state-file recovery)
 
 ### v2 (not committed)
 

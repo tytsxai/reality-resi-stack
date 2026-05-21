@@ -1,10 +1,10 @@
-.PHONY: help lint shellcheck shfmt ruff yamllint jsonlint mdcheck redact examples clean
+.PHONY: help lint test shellcheck shfmt ruff yamllint jsonlint mdcheck redact examples clean
 
 SHELL := /usr/bin/env bash
 REPO_ROOT := $(shell pwd)
 
 SH_FILES := $(shell find install scripts -type f \( -name '*.sh' -o -name '*.bash' \) 2>/dev/null)
-PY_FILES := subscription
+PY_FILES := subscription tests
 YAML_FILES := $(shell find templates examples .github -type f \( -name '*.yml' -o -name '*.yaml' \) 2>/dev/null)
 JSON_FILES := $(shell find templates examples -type f -name '*.json' 2>/dev/null)
 MD_FILES := $(shell find . -type f -name '*.md' -not -path './.git/*' 2>/dev/null)
@@ -12,6 +12,7 @@ MD_FILES := $(shell find . -type f -name '*.md' -not -path './.git/*' 2>/dev/nul
 help:
 	@echo "Targets:"
 	@echo "  make lint        — run all linters (shellcheck/shfmt/ruff/yamllint/jsonlint)"
+	@echo "  make test        — run subscription unit tests"
 	@echo "  make redact      — scan tree for leaked credentials"
 	@echo "  make examples    — regenerate examples/ from templates/"
 	@echo "  make shellcheck  — bash static analysis"
@@ -23,6 +24,9 @@ help:
 	@echo "  make clean       — remove generated examples"
 
 lint: shellcheck shfmt ruff yamllint jsonlint
+
+test:
+	@python3 -m unittest discover -s tests -p 'test_*.py'
 
 shellcheck:
 	@command -v shellcheck >/dev/null || { echo "shellcheck not installed; brew install shellcheck"; exit 1; }

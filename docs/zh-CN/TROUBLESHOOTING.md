@@ -104,6 +104,8 @@ sudo sed -i "s/^USAGE_OFFSET_BYTES=.*/USAGE_OFFSET_BYTES=${OFFSET}/" /etc/realit
 sudo systemctl restart subscription-leaf
 ```
 
+如果 `usage-state.json` 还不存在或刚被恢复清空，先访问一次 `http://127.0.0.1/<TOKEN>/status` 让 leaf 建立 baseline，再按上面公式校准。`USAGE_OFFSET_BYTES` 可以为负数；服务端会把最终返回值钳到不低于 0。
+
 ---
 
 ## TLS 自握手失败 / Reality 似乎没生效
@@ -184,7 +186,7 @@ systemctl start sing-box
 sing-box check -C /etc/sing-box/conf
 ```
 
-⚠️ 备份归档**不含** `var/lib/reality-resi-stack/usage-state.json`（运行时数据），所以恢复后流量计数会从恢复时刻重新起算。可以用上面"流量统计漂移"小节的命令补一个 offset。
+⚠️ 备份归档**不含** `var/lib/reality-resi-stack/usage-state.json` 或 `usage-cache.json`（运行时数据），所以恢复后流量计数会从恢复时刻重新起算。归档会包含 `/etc/reality-resi-stack/`，里面有密钥和 token，不能公开传播。恢复后可以用上面"流量统计漂移"小节的命令补一个 offset。
 
 ---
 

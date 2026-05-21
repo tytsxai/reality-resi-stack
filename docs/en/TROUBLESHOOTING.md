@@ -104,6 +104,8 @@ sudo sed -i "s/^USAGE_OFFSET_BYTES=.*/USAGE_OFFSET_BYTES=${OFFSET}/" /etc/realit
 sudo systemctl restart subscription-leaf
 ```
 
+If `usage-state.json` does not exist yet or was cleared during restore, hit `http://127.0.0.1/<TOKEN>/status` once to establish the baseline, then apply the formula above. `USAGE_OFFSET_BYTES` may be negative; the server clamps the final reported value to zero or above.
+
 ---
 
 ## TLS self-handshake fails / Reality doesn't seem to work
@@ -183,7 +185,7 @@ systemctl start sing-box
 sing-box check -C /etc/sing-box/conf
 ```
 
-⚠️ Backups **do not** include `/var/lib/reality-resi-stack/usage-state.json` (runtime state), so after a restore the counter restarts. Apply a `USAGE_OFFSET_BYTES` (see "Counter doesn't match provider dashboard" above).
+⚠️ Backups **do not** include `/var/lib/reality-resi-stack/usage-state.json` or `usage-cache.json` (runtime state), so after a restore the counter restarts. Archives include `/etc/reality-resi-stack/`, which contains secrets and tokens; do not share them publicly. Apply a `USAGE_OFFSET_BYTES` after restore (see "Counter doesn't match provider dashboard" above).
 
 ---
 

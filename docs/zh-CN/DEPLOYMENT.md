@@ -54,13 +54,21 @@
 ## 3. 快速路径：一行安装
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/v1.0.0/install/install.sh) \
+bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/main/install/install.sh) \
   --node-name "US-Resi-01" \
   --sni addons.mozilla.org \
   --with-subscription
 ```
 
 脚本会自己 clone 仓库到 `/opt/reality-resi-stack/`，再 exec 完整安装器。所有阶段都在屏幕上有进度。
+
+默认拉取 `main`。如果你要固定某个分支或 tag，用：
+
+```bash
+REALITY_RESI_STACK_REF=v1.0.3 bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/main/install/install.sh) \
+  --node-name "US-Resi-01" \
+  --with-subscription
+```
 
 **强烈建议先跑一次 `--dry-run`**：
 
@@ -171,7 +179,7 @@ sing-box check -C /etc/sing-box/conf
 bash /opt/reality-resi-stack/install/uninstall.sh
 ```
 
-默认保留 `/etc/reality-resi-stack/`（含密钥）和 `/var/backups/reality-resi-stack/`（备份归档）。要全部清除：
+默认保留 `/etc/reality-resi-stack/`（含密钥，不能公开传播）和 `/var/backups/reality-resi-stack/`（备份归档）。要全部清除：
 
 ```bash
 bash /opt/reality-resi-stack/install/uninstall.sh --purge-all

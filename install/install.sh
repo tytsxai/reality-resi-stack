@@ -2,7 +2,7 @@
 # reality-resi-stack installer.
 #
 # Quick install:
-#   bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/v1.0.0/install/install.sh) \
+#   bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/main/install/install.sh) \
 #     --node-name "US-Resi-01" --sni addons.mozilla.org
 #
 # Flags:
@@ -22,26 +22,31 @@
 #   --config FILE               Source a file with all the above as KEY=VALUE
 #   --uninstall                 Tear down (calls uninstall.sh)
 #   --help                      This message
+#
+# Environment:
+#   REALITY_RESI_STACK_REF      Branch/tag for remote-piped installs (default: main)
 
 set -Eeuo pipefail
 
 # ── Self-locate the repo (handles both clone-and-run and curl-piped use) ─
 REPO_DIR=/opt/reality-resi-stack
+REALITY_RESI_STACK_REF="${REALITY_RESI_STACK_REF:-main}"
 SCRIPT_PATH="${BASH_SOURCE[0]:-}"
 
 # When invoked via `bash <(curl ...)`, BASH_SOURCE is /dev/fd/<n> — we need
 # to fetch the full repo before we can source lib/*.sh and read templates/.
 if [[ -z "$SCRIPT_PATH" || "$SCRIPT_PATH" == /dev/fd/* || "$SCRIPT_PATH" == /proc/* ]]; then
-  echo ">> Detected remote-piped run — fetching full repo to $REPO_DIR…"
+  echo ">> Detected remote-piped run — fetching ref ${REALITY_RESI_STACK_REF} to $REPO_DIR…"
   if ! command -v git >/dev/null 2>&1; then
     apt-get update -qq && apt-get install -y -qq git
   fi
   if [[ -d "$REPO_DIR/.git" ]]; then
-    git -C "$REPO_DIR" fetch --depth 1 origin main 2>/dev/null || true
-    git -C "$REPO_DIR" reset --hard origin/main 2>/dev/null || true
+    git -C "$REPO_DIR" fetch --depth 1 origin "$REALITY_RESI_STACK_REF"
+    git -C "$REPO_DIR" reset --hard FETCH_HEAD
   else
     rm -rf "$REPO_DIR"
-    git clone --depth 1 https://github.com/tytsxai/reality-resi-stack.git "$REPO_DIR"
+    git clone --depth 1 --branch "$REALITY_RESI_STACK_REF" \
+      https://github.com/tytsxai/reality-resi-stack.git "$REPO_DIR"
   fi
   exec bash "$REPO_DIR/install/install.sh" "$@"
 fi
@@ -166,6 +171,10 @@ export DRY_RUN
 
 if [[ "$DO_UNINSTALL" == "1" ]]; then
   exec bash "$REPO_ROOT/install/uninstall.sh"
+fi
+
+if [[ "$WITH_SUBSCRIPTION" == "1" && "$WITH_AGGREGATOR" == "1" ]]; then
+  die "--with-subscription and --with-aggregator are mutually exclusive"
 fi
 
 # ── Interactive fill-in for required ─────────────────────────────────────

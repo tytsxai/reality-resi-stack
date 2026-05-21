@@ -19,6 +19,7 @@ BACKUP_DIR=/var/backups/reality-resi-stack
 STAMP="$(date +%Y-%m-%d-%H%M%S)"
 OUT="$BACKUP_DIR/reality-resi-stack-${STAMP}.tar.gz"
 mkdir -p "$BACKUP_DIR"
+chmod 700 "$BACKUP_DIR"
 
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
@@ -33,6 +34,8 @@ trap 'rm -rf "$TMP"' EXIT
 } > "$TMP/manifest.txt"
 
 tar -czf "$OUT" -C / --ignore-failed-read \
+  --exclude=var/lib/reality-resi-stack/usage-state.json \
+  --exclude=var/lib/reality-resi-stack/usage-cache.json \
   etc/sing-box \
   etc/systemd/system/sing-box.service \
   etc/systemd/system/subscription-leaf.service \
@@ -45,6 +48,7 @@ tar -czf "$OUT" -C / --ignore-failed-read \
   etc/sysctl.d \
   etc/systemd/journald.conf.d \
   "$TMP/manifest.txt"
+chmod 600 "$OUT"
 
 # Retain only the 3 most recent backups.
 find "$BACKUP_DIR" -name 'reality-resi-stack-*.tar.gz' -type f \

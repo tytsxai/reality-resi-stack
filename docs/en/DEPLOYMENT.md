@@ -52,13 +52,21 @@ Decide these before running. The installer prompts for missing values, but bundl
 ## 3. Fast path: one-line install
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/v1.0.0/install/install.sh) \
+bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/main/install/install.sh) \
   --node-name "US-Resi-01" \
   --sni addons.mozilla.org \
   --with-subscription
 ```
 
 The script clones the repo to `/opt/reality-resi-stack/` and execs the full installer. Every phase prints progress.
+
+Remote-piped installs default to `main`. Pin a branch or tag with:
+
+```bash
+REALITY_RESI_STACK_REF=v1.0.3 bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/main/install/install.sh) \
+  --node-name "US-Resi-01" \
+  --with-subscription
+```
 
 **Strongly recommended**: do a `--dry-run` first:
 
@@ -169,7 +177,7 @@ If you're jumping multiple major versions, check the upstream [sing-box release 
 bash /opt/reality-resi-stack/install/uninstall.sh
 ```
 
-By default this preserves `/etc/reality-resi-stack/` (including secrets) and `/var/backups/reality-resi-stack/`. To wipe everything:
+By default this preserves `/etc/reality-resi-stack/` (including secrets; do not share it publicly) and `/var/backups/reality-resi-stack/`. To wipe everything:
 
 ```bash
 bash /opt/reality-resi-stack/install/uninstall.sh --purge-all

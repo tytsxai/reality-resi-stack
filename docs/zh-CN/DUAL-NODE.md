@@ -85,19 +85,31 @@ rules:
 
 假设你已经按 [DEPLOYMENT.md](DEPLOYMENT.md) 跑通了第一台机器（住宅 leaf）。
 
-### 第 1 步：在 leaf 上记下两个值
+### 第 1 步：在 leaf 上记下住宅节点信息
 
 ```bash
 grep ^SUB_TOKEN /etc/reality-resi-stack/secrets.env
+grep ^UUID /etc/reality-resi-stack/secrets.env
+grep ^REALITY_PUBLIC_KEY /etc/reality-resi-stack/secrets.env
 ip route get 1.1.1.1 | grep -oP 'src \K\S+'   # leaf 的公网 IP
 ```
 
-得到 `SUB_TOKEN=xxxxxxxx-...` 和 leaf 公网 IP。
+得到 leaf 的 `SUB_TOKEN`、`UUID`、`REALITY_PUBLIC_KEY` 和公网 IP。不要把 `REALITY_PRIVATE_KEY` 复制到备用节点，也不要把这些值贴到公开 issue。
 
 ### 第 2 步：在备用数据中心 VPS 上跑
 
 ```bash
+cat > /root/aggregator.env <<'EOF'
+RESI_SERVER_IP=<LEAF_IP>
+RESI_UUID=<LEAF_UUID>
+RESI_REALITY_PUBLIC_KEY=<LEAF_REALITY_PUBLIC_KEY>
+RESI_NODE_NAME=US-Resi-01
+RESI_SNI=addons.mozilla.org
+RESI_INBOUND_PORT=443
+EOF
+
 bash <(curl -fsSL .../install.sh) \
+  --config /root/aggregator.env \
   --node-name "US-DC-01" \
   --sni addons.mozilla.org \
   --with-aggregator "http://<LEAF_IP>/<SUB_TOKEN>/status"
@@ -108,6 +120,8 @@ aggregator 模式会：
 - 装 aggregator 订阅服务
 - 渲染双节点 Clash YAML（包含两个 proxies + 上面那套智能分流规则）
 - 配置缓存回退
+
+`RESI_*` 变量用于把住宅节点写进 aggregator 返回的客户端订阅；备用数据中心节点的 `DC_*` 值默认由本次安装新生成的 UUID、Reality public key、`--node-name` 和本机公网 IP 派生。缺少 `RESI_SERVER_IP`、`RESI_UUID`、`RESI_REALITY_PUBLIC_KEY` 或 `RESI_NODE_NAME` 时，安装器会直接停止，避免生成半坏订阅。
 
 ### 第 3 步：客户端只订阅 aggregator 的 URL
 

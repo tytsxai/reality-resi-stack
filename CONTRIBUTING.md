@@ -21,6 +21,7 @@ brew install shellcheck shfmt
 pip install ruff yamllint
 
 # Make changes, then before pushing:
+make test
 make lint
 make redact
 make examples       # regenerates examples/ from templates/; if diff, commit
@@ -28,7 +29,7 @@ make examples       # regenerates examples/ from templates/; if diff, commit
 
 ## PR checklist
 
-- [ ] `make lint` passes locally
+- [ ] `make test` and `make lint` pass locally
 - [ ] `make redact` passes (no leaked secrets, no new unrecognized UUID-shape strings)
 - [ ] If you changed templates: `make examples` re-run, diff committed
 - [ ] If you changed `docs/zh-CN/`: mirrored to `docs/en/`

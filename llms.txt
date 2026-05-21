@@ -1,56 +1,64 @@
 # reality-resi-stack
 
-> Residential-IP-first VLESS + Reality toolkit for sing-box. One-line installer for Ubuntu 22.04+/Debian 12+ that sets up VLESS+Reality+xtls-rprx-vision, a zero-dependency Python subscription server, optional dual-node smart routing (residential for OpenAI/banking/Netflix, data-center fallback for Telegram/Discord), BBR + UFW + fail2ban + systemd-timer daily backups, with idempotent re-runs and a hash-only secret denylist enforced in CI.
+## One-sentence description
 
-Designed for people who *bought* a residential-IP VPS specifically because OpenAI/Anthropic/banks/streaming reward residential egress reputation — but who are then hit by Telegram/Discord soft-throttling that's specific to residential subnets shared with previous bot abusers. Most VLESS installers solve the "cheap VPS bypass" case; this one solves the "premium residential VPS as an asset" case.
+reality-resi-stack is a GPL-3.0 self-hosted VLESS Reality deployment stack for sing-box that installs a residential-IP-friendly proxy node on Ubuntu/Debian and optionally serves client subscriptions with usage cards and dual-node smart routing.
+
+## 中文摘要
+
+reality-resi-stack 是一个面向个人和小团队的开源自托管代理工具包。它通过 Bash 安装器在 Ubuntu 22.04+ / Debian 12+ VPS 上部署 sing-box、VLESS、Reality、xtls-rprx-vision、systemd 服务、UFW / fail2ban、BBR、swap、配置备份 timer，并可选安装 Python 标准库实现的订阅 leaf 或 aggregator 服务。
+
+项目重点不是“隐藏住宅 IP”，而是把住宅 IP 当作高信誉出口资产使用：OpenAI、ChatGPT、Anthropic、Claude、Netflix、银行等更适合走住宅出口；Telegram、Discord 等可能对住宅 IP 段软降权的流量可以通过双节点模式走数据中心备用节点。客户端通常只订阅一个 Clash YAML URL。
+
+## English summary
+
+reality-resi-stack is a self-hosted residential-IP-first VLESS Reality toolkit. It deploys sing-box on Ubuntu/Debian VPS hosts and can publish subscription profiles through standard-library-only Python HTTP servers. In dual-node mode, it produces a unified Clash profile that routes OpenAI/Anthropic/Netflix/banking-style traffic through a residential node and Telegram/Discord traffic through a data-center fallback node.
+
+The project is designed for people who already own VPS servers. It does not sell residential IPs, does not provide a commercial proxy panel, and does not implement multi-user billing.
+
+## What the repository contains
+
+- `install/install.sh`: installer entrypoint. Important flags: `--node-name`, `--sni`, `--inbound-port`, `--ssh-port`, `--interface`, `--total-bytes`, `--with-subscription`, `--with-aggregator`, `--harden-ssh`, `--dry-run`, `--non-interactive`, `--config`, `--uninstall`.
+- `install/lib/system.sh`: system preflight, packages, BBR, swap, journald limits, UFW, fail2ban, optional SSH hardening.
+- `install/lib/singbox.sh`: installs sing-box from the official Sagernet apt source, verifies the configured GPG fingerprint, generates UUID and Reality keys, renders `/etc/sing-box/conf`, and verifies the service.
+- `install/lib/subscription.sh`: installs the subscription leaf or aggregator service and renders Clash profiles.
+- `subscription/leaf_server.py`: zero-dependency Python HTTP server for subscription files, `/healthz`, `/<TOKEN>/status`, and monthly NIC RX+TX usage accounting.
+- `subscription/aggregator_server.py`: zero-dependency Python HTTP server that polls a leaf `/status`, caches usage, and serves a unified dual-node subscription profile.
+- `templates/`: sing-box JSON, Clash YAML, systemd unit, and environment templates.
+- `examples/`: generated placeholder profiles from `scripts/make-example.sh`; values are intentionally fake and must not be deployed.
+- `docs/`: bilingual documentation for deployment, dual-node routing, subscription design, client import, and troubleshooting.
 
 ## Key docs
 
-- [README.md](README.md): Bilingual overview, one-line installer, architecture diagrams (single-node + dual-node).
-- [docs/zh-CN/DEPLOYMENT.md](docs/zh-CN/DEPLOYMENT.md) · [docs/en/DEPLOYMENT.md](docs/en/DEPLOYMENT.md): Step-by-step deployment.
-- [docs/zh-CN/DUAL-NODE.md](docs/zh-CN/DUAL-NODE.md) · [docs/en/DUAL-NODE.md](docs/en/DUAL-NODE.md): Dual-node + smart routing.
-- [docs/zh-CN/SUBSCRIPTION.md](docs/zh-CN/SUBSCRIPTION.md) · [docs/en/SUBSCRIPTION.md](docs/en/SUBSCRIPTION.md): Subscription server design (Subscription-Userinfo header, traffic card, /healthz).
-- [docs/zh-CN/TROUBLESHOOTING.md](docs/zh-CN/TROUBLESHOOTING.md) · [docs/en/TROUBLESHOOTING.md](docs/en/TROUBLESHOOTING.md): Why your Telegram is stalled, why OpenAI says "unsupported region", etc.
-- [docs/zh-CN/CLIENTS.md](docs/zh-CN/CLIENTS.md) · [docs/en/CLIENTS.md](docs/en/CLIENTS.md): Client import (v2rayN / Clash Verge / sing-box / Shadowrocket).
-- [CHANGELOG.md](CHANGELOG.md): Version history.
-- [SECURITY.md](SECURITY.md): Threat model, secret denylist policy.
+- [README.md](README.md): bilingual landing page, project summary, quick start, architecture, features, limits, FAQ.
+- [docs/README.md](docs/README.md): documentation index and code map.
+- [docs/zh-CN/DEPLOYMENT.md](docs/zh-CN/DEPLOYMENT.md) and [docs/en/DEPLOYMENT.md](docs/en/DEPLOYMENT.md): deployment guide.
+- [docs/zh-CN/DUAL-NODE.md](docs/zh-CN/DUAL-NODE.md) and [docs/en/DUAL-NODE.md](docs/en/DUAL-NODE.md): residential + data-center smart routing.
+- [docs/zh-CN/SUBSCRIPTION.md](docs/zh-CN/SUBSCRIPTION.md) and [docs/en/SUBSCRIPTION.md](docs/en/SUBSCRIPTION.md): subscription leaf and aggregator design.
+- [docs/zh-CN/CLIENTS.md](docs/zh-CN/CLIENTS.md) and [docs/en/CLIENTS.md](docs/en/CLIENTS.md): v2rayN, Clash Verge, Stash, Shadowrocket, v2rayNG, NekoBox, and sing-box client import.
+- [docs/zh-CN/TROUBLESHOOTING.md](docs/zh-CN/TROUBLESHOOTING.md) and [docs/en/TROUBLESHOOTING.md](docs/en/TROUBLESHOOTING.md): common failures and fixes.
+- [SECURITY.md](SECURITY.md): threat model and secret handling policy.
+- [CONTRIBUTING.md](CONTRIBUTING.md): contribution workflow, lint gates, docs mirroring rule.
 
-## What this toolkit deploys
+## Intended users
 
-- **sing-box** with **VLESS + Reality + xtls-rprx-vision** inbound on port 443 (no domain, no TLS cert needed)
-- **Zero-dependency Python subscription server** returning a Clash-format profile with `Subscription-Userinfo` traffic header
-- **Optional dual-node smart routing**: data-center "leaf" node polls the residential "aggregator" for status, returns a merged subscription with Clash rules sending OpenAI/Anthropic/Netflix/banking domains through residential, Telegram/Discord through the DC node
-- **System tuning**: BBR, swap, journald log limits
-- **Hardening**: UFW (only 443 + subscription port open), fail2ban
-- **Operability**: systemd-timer daily encrypted config backup, `/healthz` endpoint, end-to-end self-check on every install
-- **Idempotent installer**: re-running does not duplicate config or rotate secrets
+- Developers or small teams who own a residential IP VPS or regular VPS.
+- Users who need OpenAI, ChatGPT, Anthropic, Claude, Netflix, banking, or similar traffic to use a residential egress IP.
+- Users whose Telegram or Discord experience is degraded on a residential subnet and who want domain-based routing to a data-center fallback node.
+- Operators who prefer simple Bash + systemd automation over a full web panel.
 
-## What this toolkit does NOT do
+## Not intended for
 
-- ❌ Provide servers or residential IPs — you bring the VPS
-- ❌ Run on CentOS 7, Alpine, OpenWRT (Ubuntu 22.04+ / Debian 12+ only by design)
-- ❌ Set up domain-based TLS (Reality has no domain requirement; that's the whole point)
-- ❌ Hide your egress IP (residential IP is the asset — it's *meant* to be visible)
-- ❌ Bypass IP-based bans on services that detect VLESS itself (use a different tool)
-- ❌ Manage multi-user accounting beyond the single-UUID model (`xray-core` / 3x-ui are better for that)
-
-## Common questions
-
-- **Why are Telegram file uploads stalling on my residential VPS?** Telegram soft-throttles residential subnets that have hosted bots in the past. Use the dual-node mode and route `geosite:telegram` through the data-center fallback.
-- **Why does OpenAI think I'm in an unsupported region from my data-center VPS?** Because data-center IPs are flagged as commercial / VPN-likely. That's exactly why you want residential egress for OpenAI — the inverse of the Telegram problem.
-- **Does Reality need a domain?** No. That's its main advantage over Trojan / V2Ray-TLS. You pick a high-reputation SNI to spoof (default: `addons.mozilla.org`).
-- **Why GPL-3.0?** Inherited from sing-box's ecosystem norms. Use in proprietary products requires open-sourcing under GPL-3.0 or a commercial license arrangement.
-- **Can I re-run the installer safely?** Yes — installer is idempotent and will not rotate UUIDs or Reality keys on re-run.
-
-## Repository
-
-- GitHub: https://github.com/tytsxai/reality-resi-stack
-- License: GPL-3.0
-- Core: sing-box
-- Platforms: Ubuntu 22.04+, Debian 12+
-- Author: tytsxai
+- Commercial proxy resale panels.
+- Multi-user billing and quota management.
+- Buying or sourcing residential IPs.
+- CentOS 7, Alpine, OpenWRT, Docker-only, Kubernetes, or Helm deployments.
+- Bypassing account-level bans, legal restrictions, service policy enforcement, or protocol-level blocking.
 
 ## Useful search phrases
 
-- residential IP VLESS, residential proxy VLESS Reality, sing-box residential installer, OpenAI 住宅 IP 代理, ChatGPT 住宅 IP 出口, Anthropic residential egress, Telegram 住宅 IP 卡顿, Telegram 住宅 IP 上传慢, Discord 住宅 IP, Netflix 住宅 IP, sing-box 一键脚本住宅, VLESS Reality 住宅, 双节点智能分流, Clash 域名分流住宅
-- alternative to 3x-ui for residential VPS, alternative to XHTTP-Installer for residential, residential VPS smart routing
+residential IP VLESS; residential proxy VLESS Reality; sing-box residential installer; VLESS Reality 一键脚本; OpenAI 住宅 IP 代理; ChatGPT 住宅 IP 出口; Anthropic residential egress; Claude residential proxy; Telegram 住宅 IP 卡顿; Telegram 住宅 IP 上传慢; Discord 住宅 IP 降权; Netflix 住宅 IP; Clash 域名分流住宅; 双节点智能分流; alternative to 3x-ui for residential VPS; alternative to XHTTP-Installer for residential VPS; self-hosted VLESS Reality Ubuntu; sing-box subscription server usage card.
+
+## GitHub Topics suggestions
+
+sing-box, vless, reality, xtls, residential-ip, proxy, self-hosted, clash, subscription-server, v2rayn, telegram, openai, ubuntu, debian, systemd

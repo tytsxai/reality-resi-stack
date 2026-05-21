@@ -99,7 +99,8 @@ Subscription-Userinfo: upload=0; download=10485760; total=1063004405760; expire=
 读 /sys/class/net/<INTERFACE>/statistics/rx_bytes
 读 /sys/class/net/<INTERFACE>/statistics/tx_bytes
 按月份累计，下月归零
-启动时通过 boot_id 检测重启 —— 重启后不再累加（避免双计）
+首次采样只建立 baseline，不把安装前的历史网卡流量算进去
+启动时通过 boot_id 检测重启 —— 重启后把新 boot 的当前计数并入月累计
 返回客户端前加上 USAGE_OFFSET_BYTES（手动校准）
 ```
 
@@ -110,7 +111,7 @@ Subscription-Userinfo: upload=0; download=10485760; total=1063004405760; expire=
 ❌ **不等于商家后台账单**。商家可能按 95 计费、按出方向、按五分钟峰值，口径完全不同。
 ❌ 如果你的 sing-box 在这台机器上同时跑别的负载（如个人 web），这些非代理流量也会被算进去。
 
-商家后台数字比订阅卡片大很多时，最常见原因是订阅服务"晚启动"了 —— 月初服务还没起，先漏算了一段。此时用 `USAGE_OFFSET_BYTES` 补一个基线即可（命令在 [TROUBLESHOOTING.md](TROUBLESHOOTING.md) "流量统计漂移"小节）。
+商家后台数字比订阅卡片大很多时，最常见原因是订阅服务"晚启动"了 —— 月初服务还没起，先漏算了一段。首次采样也会刻意只建立 baseline，避免把安装前的历史流量一次性算进卡片。此时用 `USAGE_OFFSET_BYTES` 补一个基线即可（命令在 [TROUBLESHOOTING.md](TROUBLESHOOTING.md) "流量统计漂移"小节）。
 
 ---
 

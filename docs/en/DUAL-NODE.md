@@ -85,17 +85,31 @@ rules:
 
 Assumes you already have the residential leaf running per [DEPLOYMENT.md](DEPLOYMENT.md).
 
-### Step 1: get two values from the leaf
+### Step 1: get residential-node values from the leaf
 
 ```bash
 grep ^SUB_TOKEN /etc/reality-resi-stack/secrets.env
+grep ^UUID /etc/reality-resi-stack/secrets.env
+grep ^REALITY_PUBLIC_KEY /etc/reality-resi-stack/secrets.env
 ip route get 1.1.1.1 | grep -oP 'src \K\S+'   # leaf's public IP
 ```
+
+You need the leaf's `SUB_TOKEN`, `UUID`, `REALITY_PUBLIC_KEY`, and public IP. Do not copy `REALITY_PRIVATE_KEY` to the backup node, and do not paste these values into public issues.
 
 ### Step 2: on the data-center VPS
 
 ```bash
+cat > /root/aggregator.env <<'EOF'
+RESI_SERVER_IP=<LEAF_IP>
+RESI_UUID=<LEAF_UUID>
+RESI_REALITY_PUBLIC_KEY=<LEAF_REALITY_PUBLIC_KEY>
+RESI_NODE_NAME=US-Resi-01
+RESI_SNI=addons.mozilla.org
+RESI_INBOUND_PORT=443
+EOF
+
 bash <(curl -fsSL .../install.sh) \
+  --config /root/aggregator.env \
   --node-name "US-DC-01" \
   --sni addons.mozilla.org \
   --with-aggregator "http://<LEAF_IP>/<SUB_TOKEN>/status"
@@ -106,6 +120,8 @@ Aggregator mode will:
 - Install the aggregator subscription server
 - Render the dual-node Clash YAML (two proxies + smart routing rules)
 - Configure cache fallback
+
+The `RESI_*` variables are used to write the residential node into the client profile served by the aggregator. The data-center node's `DC_*` values default to the UUID, Reality public key, node name, and public IP generated on this install. If `RESI_SERVER_IP`, `RESI_UUID`, `RESI_REALITY_PUBLIC_KEY`, or `RESI_NODE_NAME` is missing, the installer stops before rendering a broken subscription.
 
 ### Step 3: clients subscribe only to the aggregator URL
 

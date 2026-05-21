@@ -85,7 +85,8 @@ Full reference in `templates/env/subscription-leaf.env.example` and `subscriptio
 read /sys/class/net/<INTERFACE>/statistics/rx_bytes
 read /sys/class/net/<INTERFACE>/statistics/tx_bytes
 accumulate by month, reset on month change
-detect reboots via boot_id — do not double-count after reboot
+first sample establishes a baseline instead of counting pre-install host traffic
+detect reboots via boot_id — add the new boot's current counter into monthly usage
 add USAGE_OFFSET_BYTES before returning to clients (manual calibration)
 ```
 
@@ -96,7 +97,7 @@ The honest bounds of this:
 ❌ **Not the same as your VPS provider's billing**. Providers may bill on 95th-percentile, on outbound only, on 5-minute peaks — entirely different units.
 ❌ If the host runs other workloads (a personal web server, backups), that non-proxy traffic is included too.
 
-When the provider dashboard is much higher than the subscription card, the usual cause is "the subscription server started later than the month did" — apply a `USAGE_OFFSET_BYTES` to catch up (see [TROUBLESHOOTING.md](TROUBLESHOOTING.md), "Traffic counter drifts" section).
+When the provider dashboard is much higher than the subscription card, the usual cause is "the subscription server started later than the month did." The first sample is also intentionally treated as a baseline so pre-install host traffic is not dumped into the card. Apply a `USAGE_OFFSET_BYTES` to catch up (see [TROUBLESHOOTING.md](TROUBLESHOOTING.md), "Traffic counter drifts" section).
 
 ---
 

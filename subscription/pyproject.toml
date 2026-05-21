@@ -1,8 +1,35 @@
 [project]
 name = "reality-resi-stack-subscription"
 version = "1.0.0"
-description = "Subscription leaf + aggregator HTTP servers for reality-resi-stack."
+description = "Zero-dependency Python subscription leaf and aggregator HTTP servers for the reality-resi-stack sing-box VLESS Reality deployment toolkit."
 requires-python = ">=3.10"
+readme = "README.md"
+license = { text = "GPL-3.0-only" }
+keywords = [
+  "sing-box",
+  "vless",
+  "reality",
+  "residential-ip",
+  "subscription-server",
+  "clash",
+  "proxy",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Topic :: Internet :: Proxy Servers",
+  "Topic :: System :: Networking",
+]
+
+[project.urls]
+Homepage = "https://github.com/tytsxai/reality-resi-stack"
+Repository = "https://github.com/tytsxai/reality-resi-stack"
+Documentation = "https://github.com/tytsxai/reality-resi-stack/tree/main/docs"
+Issues = "https://github.com/tytsxai/reality-resi-stack/issues"
 
 [tool.ruff]
 line-length = 100

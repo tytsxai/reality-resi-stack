@@ -68,7 +68,12 @@ phase_generate_keys() {
   if [[ -f "$secrets" ]]; then
     info "Secrets already exist at $secrets — reusing (will not regenerate)"
     # shellcheck source=/dev/null
-    [[ "$DRY_RUN" != "1" ]] && . "$secrets"
+    if [[ "$DRY_RUN" != "1" ]]; then
+      . "$secrets"
+      : "${UUID:?}" "${REALITY_PRIVATE_KEY:?}" "${REALITY_PUBLIC_KEY:?}" "${SUB_TOKEN:?}"
+      SHORT_ID="${SHORT_ID:-}"
+      export UUID REALITY_PRIVATE_KEY REALITY_PUBLIC_KEY SUB_TOKEN SHORT_ID
+    fi
     return 0
   fi
 

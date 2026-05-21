@@ -13,6 +13,43 @@ ENV_DIR=/etc/reality-resi-stack
 PROFILE_DIR=/etc/reality-resi-stack/files
 STATE_DIR=/var/lib/reality-resi-stack
 
+prepare_aggregator_template_vars() {
+  local missing=()
+  local required=(
+    RESI_SERVER_IP
+    RESI_UUID
+    RESI_REALITY_PUBLIC_KEY
+    RESI_NODE_NAME
+  )
+  local name
+
+  for name in "${required[@]}"; do
+    [[ -n "${!name:-}" ]] || missing+=("$name")
+  done
+
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    die "--with-aggregator requires residential node variables in --config or environment: ${missing[*]}"
+  fi
+
+  RESI_SNI="${RESI_SNI:-addons.mozilla.org}"
+  RESI_INBOUND_PORT="${RESI_INBOUND_PORT:-443}"
+  RESI_SHORT_ID="${RESI_SHORT_ID:-}"
+
+  DC_SERVER_IP="${DC_SERVER_IP:-${SERVER_IP:-}}"
+  [[ -n "$DC_SERVER_IP" ]] || die "--with-aggregator requires SERVER_IP or DC_SERVER_IP"
+  DC_UUID="${DC_UUID:-$UUID}"
+  DC_REALITY_PUBLIC_KEY="${DC_REALITY_PUBLIC_KEY:-$REALITY_PUBLIC_KEY}"
+  DC_SHORT_ID="${DC_SHORT_ID:-$SHORT_ID}"
+  DC_SNI="${DC_SNI:-$SNI}"
+  DC_INBOUND_PORT="${DC_INBOUND_PORT:-$INBOUND_PORT}"
+  DC_NODE_NAME="${DC_NODE_NAME:-$NODE_NAME}"
+
+  export RESI_SERVER_IP RESI_UUID RESI_REALITY_PUBLIC_KEY RESI_NODE_NAME \
+    RESI_SNI RESI_INBOUND_PORT RESI_SHORT_ID \
+    DC_SERVER_IP DC_UUID DC_REALITY_PUBLIC_KEY DC_SHORT_ID \
+    DC_SNI DC_INBOUND_PORT DC_NODE_NAME
+}
+
 phase_subscription_leaf() {
   step "Installing subscription leaf server"
 
@@ -54,7 +91,8 @@ EOF
 phase_subscription_aggregator() {
   step "Installing subscription aggregator server"
 
-  : "${REMOTE_STATUS_URL:?}" "${SUB_TOKEN:?}"
+  : "${REMOTE_STATUS_URL:?}" "${SUB_TOKEN:?}" "${UUID:?}" "${REALITY_PUBLIC_KEY:?}"
+  prepare_aggregator_template_vars
 
   run mkdir -p "$INSTALL_LIB_DIR" "$ENV_DIR" "$PROFILE_DIR" "$STATE_DIR"
 

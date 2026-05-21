@@ -10,6 +10,11 @@ ExecStart=/usr/bin/python3 /usr/local/lib/reality-resi-stack/leaf_server.py
 Restart=always
 RestartSec=3
 WorkingDirectory=/usr/local/lib/reality-resi-stack
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/reality-resi-stack
 
 [Install]
 WantedBy=multi-user.target

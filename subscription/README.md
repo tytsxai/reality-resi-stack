@@ -31,11 +31,14 @@ The `Subscription-Userinfo` header follows the original
 
 | File | Owner | Purpose |
 |---|---|---|
-| `/var/lib/reality-resi-stack/usage-state.json` | leaf | Monotonically increasing monthly counter; rolls over on month change. |
+| `/var/lib/reality-resi-stack/usage-state.json` | leaf | Monotonically increasing monthly counter; first sample is a baseline and the counter rolls over on month change. |
 | `/var/lib/reality-resi-stack/usage-cache.json` | aggregator | Last-known-good remote status; serves as fallback when the leaf is down. |
 
 State files are excluded from backups intentionally — they are runtime data,
 not configuration.
+
+Config backups do include `/etc/reality-resi-stack/`, which may contain
+tokens and generated Reality credentials. Treat backup archives as sensitive.
 
 ## Running locally (test)
 
