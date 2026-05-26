@@ -19,11 +19,13 @@ cd reality-resi-stack
 # Install tooling once
 brew install shellcheck shfmt
 pip install ruff yamllint
+npm i -g markdown-link-check
 
 # Make changes, then before pushing:
 make test
 make lint
 make redact
+make mdcheck
 make examples       # regenerates examples/ from templates/; if diff, commit
 ```
 
@@ -31,6 +33,7 @@ make examples       # regenerates examples/ from templates/; if diff, commit
 
 - [ ] `make test` and `make lint` pass locally
 - [ ] `make redact` passes (no leaked secrets, no new unrecognized UUID-shape strings)
+- [ ] `make mdcheck` passes (Markdown links still resolve)
 - [ ] If you changed templates: `make examples` re-run, diff committed
 - [ ] If you changed `docs/zh-CN/`: mirrored to `docs/en/`
 - [ ] If you changed an `install/lib/*.sh` phase: confirmed idempotent (re-ran twice, second run = no-op)

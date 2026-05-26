@@ -20,7 +20,7 @@ help:
 	@echo "  make ruff        — Python lint"
 	@echo "  make yamllint    — YAML lint"
 	@echo "  make jsonlint    — JSON lint"
-	@echo "  make mdcheck     — markdown link check"
+	@echo "  make mdcheck     — markdown link check (uses markdown-link-check or npx fallback)"
 	@echo "  make clean       — remove generated examples"
 
 lint: shellcheck shfmt ruff yamllint jsonlint
@@ -48,8 +48,23 @@ jsonlint:
 	@if [[ -n "$(JSON_FILES)" ]]; then for f in $(JSON_FILES); do python3 -m json.tool < "$$f" >/dev/null || { echo "Invalid JSON: $$f"; exit 1; }; done; fi
 
 mdcheck:
-	@command -v markdown-link-check >/dev/null || { echo "markdown-link-check not installed; npm i -g markdown-link-check"; exit 1; }
-	@for f in $(MD_FILES); do markdown-link-check -q "$$f" || exit 1; done
+	@if command -v markdown-link-check >/dev/null 2>&1; then \
+		cmd="markdown-link-check"; \
+	elif command -v npx >/dev/null 2>&1; then \
+		cmd="npx --yes markdown-link-check"; \
+	else \
+		echo "markdown-link-check not installed; install Node.js/npx or run: npm i -g markdown-link-check"; \
+		exit 1; \
+	fi; \
+	for f in $(MD_FILES); do \
+		attempt=1; \
+		until $$cmd -q "$$f"; do \
+			if [[ $$attempt -ge 2 ]]; then exit 1; fi; \
+			echo "markdown-link-check failed for $$f; retrying once..."; \
+			attempt=$$((attempt + 1)); \
+			sleep 2; \
+		done; \
+	done
 
 redact:
 	@scripts/redact.sh

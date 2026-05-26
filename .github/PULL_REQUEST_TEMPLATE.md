@@ -8,6 +8,7 @@
 
 - [ ] `make lint` passes locally
 - [ ] `make redact` passes (no leaked secrets, no new unrecognized UUID-shape strings)
+- [ ] `make mdcheck` passes (Markdown links still resolve)
 - [ ] If templates changed: `make examples` re-run, diff committed
 - [ ] If `docs/zh-CN/` changed: mirrored to `docs/en/`
 - [ ] If an `install/lib/*.sh` phase changed: confirmed idempotent (ran twice, second run = no-op)

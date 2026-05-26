@@ -65,10 +65,10 @@ bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/m
 
 脚本会自己 clone 仓库到 `/opt/reality-resi-stack/`，再 exec 完整安装器。所有阶段都在屏幕上有进度。
 
-默认拉取 `main`。如果你要固定某个分支或 tag，用：
+默认拉取 `main`。如果你要固定某个分支或 tag，先到 [Releases](https://github.com/tytsxai/reality-resi-stack/releases) 选一个已发布 tag，再用：
 
 ```bash
-REALITY_RESI_STACK_REF=v1.0.3 bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/main/install/install.sh) \
+REALITY_RESI_STACK_REF=<tag-or-branch> bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/main/install/install.sh) \
   --node-name "US-Resi-01" \
   --with-subscription
 ```

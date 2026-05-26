@@ -63,10 +63,10 @@ bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/m
 
 The script clones the repo to `/opt/reality-resi-stack/` and execs the full installer. Every phase prints progress.
 
-Remote-piped installs default to `main`. Pin a branch or tag with:
+Remote-piped installs default to `main`. To pin a branch or tag, choose a published tag from [Releases](https://github.com/tytsxai/reality-resi-stack/releases), then run:
 
 ```bash
-REALITY_RESI_STACK_REF=v1.0.3 bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/main/install/install.sh) \
+REALITY_RESI_STACK_REF=<tag-or-branch> bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/main/install/install.sh) \
   --node-name "US-Resi-01" \
   --with-subscription
 ```
