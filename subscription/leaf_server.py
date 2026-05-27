@@ -50,6 +50,7 @@ PROFILE_TITLE = os.environ.get("PROFILE_TITLE", "Reality-Residential")
 UPDATE_INTERVAL_HOURS = os.environ.get("UPDATE_INTERVAL_HOURS", "24")
 FILE_DIR = Path(os.environ.get("FILE_DIR", "/etc/reality-resi-stack/files"))
 DEFAULT_TARGET = os.environ.get("DEFAULT_TARGET", "profile.yaml")
+REQUEST_TIMEOUT_SECONDS = float(os.environ.get("REQUEST_TIMEOUT_SECONDS", "10"))
 
 CONTENT_TYPES = {
     ".yaml": "text/yaml; charset=utf-8",
@@ -232,6 +233,7 @@ class SubscriptionHandler(BaseHTTPRequestHandler):
             self.send_response(HTTPStatus.OK)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Content-Length", str(len(payload)))
+            self.send_header("Cache-Control", "no-store")
             self.end_headers()
             if send_body:
                 self.wfile.write(payload)
@@ -304,13 +306,24 @@ class SubscriptionHandler(BaseHTTPRequestHandler):
             self.wfile.write(payload)
 
     def log_message(self, fmt: str, *args) -> None:  # noqa: A003
-        print(f"{self.address_string()} - {fmt % args}", flush=True)
+        log.info("%s - %s", self.address_string(), fmt % args)
+
+
+class TimeoutThreadingHTTPServer(ThreadingHTTPServer):
+    daemon_threads = True
+    allow_reuse_address = True
+    request_queue_size = 64
+
+    def get_request(self):  # type: ignore[no-untyped-def]
+        sock, addr = super().get_request()
+        sock.settimeout(REQUEST_TIMEOUT_SECONDS)
+        return sock, addr
 
 
 def main() -> None:
     start_usage_polling()
-    server = ThreadingHTTPServer((HOST, PORT), SubscriptionHandler)
-    print(f"listening on {HOST}:{PORT}", flush=True)
+    server = TimeoutThreadingHTTPServer((HOST, PORT), SubscriptionHandler)
+    log.info("listening on %s:%s", HOST, PORT)
     server.serve_forever()
 
 

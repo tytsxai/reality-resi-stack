@@ -82,8 +82,11 @@ USAGE_OFFSET_BYTES=0
 BILLING_CYCLE_DAY=1
 USAGE_POLL_INTERVAL_SECONDS=60
 COUNT_CURRENT_BOOT_ON_INIT=true
+UPDATE_INTERVAL_HOURS=24
 CACHE_TTL_SECONDS=60
 REMOTE_POLL_INTERVAL_SECONDS=60
+REMOTE_TIMEOUT_SECONDS=3
+REQUEST_TIMEOUT_SECONDS=10
 WITH_SUBSCRIPTION=0
 WITH_AGGREGATOR=0
 REMOTE_STATUS_URL=""
@@ -193,6 +196,92 @@ if [[ "$WITH_SUBSCRIPTION" == "1" && "$WITH_AGGREGATOR" == "1" ]]; then
   die "--with-subscription and --with-aggregator are mutually exclusive"
 fi
 
+require_binary_flag() {
+  local name="$1" value="$2"
+  [[ "$value" == "0" || "$value" == "1" ]] || die "$name must be 0 or 1, got: $value"
+}
+
+require_uint() {
+  local name="$1" value="$2"
+  [[ "$value" =~ ^[0-9]+$ ]] || die "$name must be a non-negative integer, got: $value"
+}
+
+require_int() {
+  local name="$1" value="$2"
+  [[ "$value" =~ ^-?[0-9]+$ ]] || die "$name must be an integer, got: $value"
+}
+
+require_port() {
+  local name="$1" value="$2"
+  require_uint "$name" "$value"
+  ((value >= 1 && value <= 65535)) || die "$name must be between 1 and 65535, got: $value"
+}
+
+require_min_uint() {
+  local name="$1" value="$2" min="$3"
+  require_uint "$name" "$value"
+  ((value >= min)) || die "$name must be >= $min, got: $value"
+}
+
+require_safe_label() {
+  local name="$1" value="$2"
+  [[ "$value" =~ ^[A-Za-z0-9._\ -]+$ ]] ||
+    die "$name may contain only letters, numbers, space, dot, underscore, or hyphen: $value"
+}
+
+require_safe_host() {
+  local name="$1" value="$2"
+  [[ "$value" =~ ^[A-Za-z0-9.-]+$ && "$value" != .* && "$value" != *. ]] ||
+    die "$name must be a hostname or IPv4 address without spaces or URL syntax: $value"
+}
+
+require_safe_interface() {
+  local name="$1" value="$2"
+  [[ "$value" =~ ^[A-Za-z0-9_.:-]+$ ]] ||
+    die "$name has unsafe characters for /sys/class/net lookup: $value"
+}
+
+require_bool_word() {
+  local name="$1" value="$2"
+  case "$value" in
+    1 | 0 | true | false | yes | no | TRUE | FALSE | YES | NO | True | False | Yes | No) ;;
+    *) die "$name must be true/false/yes/no/1/0, got: $value" ;;
+  esac
+}
+
+validate_config() {
+  require_binary_flag WITH_SUBSCRIPTION "$WITH_SUBSCRIPTION"
+  require_binary_flag WITH_AGGREGATOR "$WITH_AGGREGATOR"
+  require_binary_flag HARDEN_SSH "$HARDEN_SSH"
+  require_port INBOUND_PORT "$INBOUND_PORT"
+  [[ -z "$SSH_PORT" ]] || require_port SSH_PORT "$SSH_PORT"
+  require_uint TOTAL_BYTES "$TOTAL_BYTES"
+  require_uint EXPIRE_TS "$EXPIRE_TS"
+  require_int USAGE_OFFSET_BYTES "$USAGE_OFFSET_BYTES"
+  require_uint BILLING_CYCLE_DAY "$BILLING_CYCLE_DAY"
+  ((BILLING_CYCLE_DAY >= 1 && BILLING_CYCLE_DAY <= 28)) ||
+    die "BILLING_CYCLE_DAY must be 1..28, got: $BILLING_CYCLE_DAY"
+  require_min_uint USAGE_POLL_INTERVAL_SECONDS "$USAGE_POLL_INTERVAL_SECONDS" 5
+  require_min_uint UPDATE_INTERVAL_HOURS "$UPDATE_INTERVAL_HOURS" 1
+  require_min_uint CACHE_TTL_SECONDS "$CACHE_TTL_SECONDS" 5
+  require_min_uint REMOTE_POLL_INTERVAL_SECONDS "$REMOTE_POLL_INTERVAL_SECONDS" 5
+  require_min_uint REMOTE_TIMEOUT_SECONDS "$REMOTE_TIMEOUT_SECONDS" 1
+  require_min_uint REQUEST_TIMEOUT_SECONDS "$REQUEST_TIMEOUT_SECONDS" 1
+  require_bool_word COUNT_CURRENT_BOOT_ON_INIT "$COUNT_CURRENT_BOOT_ON_INIT"
+  require_safe_label NODE_NAME "$NODE_NAME"
+  require_safe_host SNI "$SNI"
+  require_safe_interface INTERFACE "$INTERFACE"
+  [[ "$DRY_RUN" == "1" || -n "$SERVER_IP" ]] ||
+    die "SERVER_IP auto-detection failed; set SERVER_IP in --config and rerun"
+  [[ -z "$SERVER_IP" ]] || require_safe_host SERVER_IP "$SERVER_IP"
+  [[ -z "$SINGBOX_VERSION" || "$SINGBOX_VERSION" =~ ^[^[:space:]]+$ ]] ||
+    die "SINGBOX_VERSION must not contain whitespace"
+  if [[ "$WITH_AGGREGATOR" == "1" ]]; then
+    [[ "$REMOTE_STATUS_URL" =~ ^https?://[^[:space:]]+$ ]] ||
+      die "REMOTE_STATUS_URL must be an http(s) URL without spaces"
+  fi
+}
+
 # ── Interactive fill-in for required ─────────────────────────────────────
 if [[ -z "$NODE_NAME" ]]; then
   if [[ "$NON_INTERACTIVE" == "1" ]]; then
@@ -213,10 +302,14 @@ SERVER_IP="${SERVER_IP:-$(curl -fsS https://api.ipify.org 2>/dev/null || echo ""
 if [[ -z "$SERVER_IP" ]]; then
   warn "Could not auto-detect public IP. Set SERVER_IP=… or --config to render client profile."
 fi
+
+validate_config
+
 export SERVER_IP NODE_NAME SNI INBOUND_PORT SSH_PORT TIMEZONE INTERFACE \
   TOTAL_BYTES EXPIRE_TS USAGE_OFFSET_BYTES WITH_SUBSCRIPTION WITH_AGGREGATOR \
   BILLING_CYCLE_DAY USAGE_POLL_INTERVAL_SECONDS COUNT_CURRENT_BOOT_ON_INIT \
-  CACHE_TTL_SECONDS REMOTE_POLL_INTERVAL_SECONDS REMOTE_STATUS_URL \
+  UPDATE_INTERVAL_HOURS CACHE_TTL_SECONDS REMOTE_POLL_INTERVAL_SECONDS \
+  REMOTE_TIMEOUT_SECONDS REQUEST_TIMEOUT_SECONDS REMOTE_STATUS_URL \
   HARDEN_SSH SINGBOX_VERSION
 
 # ── Run phases ───────────────────────────────────────────────────────────

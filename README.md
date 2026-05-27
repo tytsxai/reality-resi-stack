@@ -1,4 +1,4 @@
-# reality-resi-stack
+# reality-resi-stack — Residential-IP VLESS Reality stack for sing-box
 
 > **住宅 IP VLESS Reality 部署栈 / Residential-IP VLESS Reality stack for sing-box**
 >
@@ -11,12 +11,20 @@
 [![sing-box](https://img.shields.io/badge/core-sing--box-purple.svg)](https://sing-box.sagernet.org)
 [![VLESS Reality](https://img.shields.io/badge/protocol-VLESS%2BReality-green.svg)](docs/en/DEPLOYMENT.md)
 [![Release](https://img.shields.io/github/v/release/tytsxai/reality-resi-stack)](https://github.com/tytsxai/reality-resi-stack/releases)
+[![GitHub stars](https://img.shields.io/github/stars/tytsxai/reality-resi-stack?style=social)](https://github.com/tytsxai/reality-resi-stack/stargazers)
 
 [新手教程](docs/zh-CN/BEGINNER_GUIDE.md) · [同类评分对比](docs/zh-CN/COMPARISON.md) · [Docs (中文)](docs/zh-CN/DEPLOYMENT.md) · [Docs (English)](docs/en/DEPLOYMENT.md) · [llms.txt](llms.txt) · [Changelog](CHANGELOG.md) · [Issues](https://github.com/tytsxai/reality-resi-stack/issues)
 
 > **Search keywords / 搜索关键词**: residential IP VLESS, VLESS Reality residential proxy, sing-box residential installer, VLESS+Reality 一键脚本, OpenAI 住宅 IP 代理, ChatGPT 住宅 IP 出口, Telegram 住宅 IP 上传慢, Discord 住宅 IP 降权, Clash 域名分流, 双节点智能分流, alternative to 3x-ui for residential VPS
 
 ---
+
+## 30 秒判断 | 30-second fit
+
+- **它是什么 / What it is**: 一个开源、可审计、可重复部署的 **sing-box VLESS Reality installer**，核心入口是 `install/install.sh`。
+- **解决什么问题 / Problem solved**: 把你自己的住宅 IP VPS 或普通 VPS 配成可导入客户端的代理节点，并在需要时用双节点规则缓解 Telegram / Discord 对部分住宅 IP 段的软降权。
+- **适合谁 / For whom**: 有自有 VPS、会 SSH、希望少维护 Web 面板的个人开发者、小团队、AI 工具用户和跨设备代理用户。
+- **不是什么 / Not**: 不是住宅 IP 供应商、不是机场面板、不是多用户计费系统，也不承诺绕过账号风控或地区政策。
 
 ## 项目速览 | Project summary
 
@@ -29,6 +37,18 @@
 | 技术栈 | Bash installer, sing-box, VLESS, Reality, xtls-rprx-vision, Python 标准库 HTTP server, systemd, UFW, fail2ban, Clash YAML | Bash installer, sing-box, VLESS, Reality, xtls-rprx-vision, Python stdlib HTTP server, systemd, UFW, fail2ban, Clash YAML |
 | 支持系统 | Ubuntu 22.04+ / 24.04 LTS, Debian 12+ | Ubuntu 22.04+ / 24.04 LTS, Debian 12+ |
 | 开源协议 | GPL-3.0 | GPL-3.0 |
+
+## 仓库元信息 | Repository metadata
+
+| 字段 | 值 |
+|---|---|
+| GitHub repository | `tytsxai/reality-resi-stack` |
+| Primary installer | `install/install.sh` |
+| Python package metadata | `subscription/pyproject.toml` |
+| Runtime services | `sing-box`, `subscription-leaf`, `subscription-aggregator`, `config-backup.timer` |
+| Main config paths | `/etc/sing-box/conf`, `/etc/reality-resi-stack/`, `/var/lib/reality-resi-stack/` |
+| Suggested GitHub About description | `Self-hosted residential-IP VLESS Reality stack for sing-box with Bash installer, Python subscription server, usage cards, and dual-node Clash routing.` |
+| Suggested GitHub Topics | `sing-box`, `vless`, `reality`, `xtls`, `residential-ip`, `proxy`, `self-hosted`, `clash`, `subscription-server`, `v2rayn`, `telegram`, `openai`, `ubuntu`, `debian`, `systemd` |
 
 ## 核心功能 | Core features
 

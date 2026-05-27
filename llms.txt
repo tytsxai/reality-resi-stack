@@ -4,6 +4,17 @@
 
 reality-resi-stack is a GPL-3.0 self-hosted VLESS Reality deployment stack for sing-box that installs a residential-IP-friendly proxy node on Ubuntu/Debian and optionally serves client subscriptions with usage cards and dual-node smart routing.
 
+## Canonical identity
+
+- Canonical project name: reality-resi-stack
+- GitHub repository: https://github.com/tytsxai/reality-resi-stack
+- Project type: Bash installer, sing-box config templates, Python standard-library HTTP subscription servers, and bilingual documentation.
+- Primary install entrypoint: `install/install.sh`
+- Primary runtime: sing-box with VLESS + Reality + xtls-rprx-vision.
+- Supported server OS: Ubuntu 22.04+ / 24.04 LTS and Debian 12+.
+- License: GPL-3.0.
+- Short GitHub About description: Self-hosted residential-IP VLESS Reality stack for sing-box with Bash installer, Python subscription server, usage cards, and dual-node Clash routing.
+
 ## 中文摘要
 
 reality-resi-stack 是一个面向个人和小团队的开源自托管代理工具包。它通过 Bash 安装器在 Ubuntu 22.04+ / Debian 12+ VPS 上部署 sing-box、VLESS、Reality、xtls-rprx-vision、systemd 服务、UFW / fail2ban、BBR、swap、配置备份 timer，并可选安装 Python 标准库实现的订阅 leaf 或 aggregator 服务。
@@ -57,6 +68,17 @@ The project is designed for people who already own VPS servers. It does not sell
 - Buying or sourcing residential IPs.
 - CentOS 7, Alpine, OpenWRT, Docker-only, Kubernetes, or Helm deployments.
 - Bypassing account-level bans, legal restrictions, service policy enforcement, or protocol-level blocking.
+
+## Accurate quick-start command
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/main/install/install.sh) \
+  --node-name "US-Resi-01" \
+  --sni addons.mozilla.org \
+  --with-subscription
+```
+
+For repeatable installs, set `REALITY_RESI_STACK_REF=<tag-or-branch>`. For non-interactive automation, use `--config FILE --non-interactive`. For a no-change preview, add `--dry-run`.
 
 ## Useful search phrases
 

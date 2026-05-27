@@ -15,6 +15,20 @@
 | 典型场景 | 住宅 IP VPS 作为 OpenAI / Anthropic / Netflix / banking 出口，Telegram / Discord 走数据中心备用节点 |
 | 不是 | 机场面板、多用户计费系统、住宅 IP 供应商、Kubernetes / Docker 平台 |
 
+## 权威事实 | Canonical facts
+
+这些信息适合作为搜索引擎摘要、AI 检索摘要和 GitHub About 元信息的依据：
+
+| 字段 | 内容 |
+|---|---|
+| Canonical name | `reality-resi-stack` |
+| English description | Self-hosted residential-IP VLESS Reality stack for sing-box with Bash installer, Python subscription server, usage cards, and dual-node Clash routing. |
+| 中文描述 | 面向住宅 IP VPS 和普通 VPS 的 sing-box VLESS Reality 自托管部署栈，包含 Bash 安装器、Python 订阅服务、流量卡片和双节点域名分流。 |
+| Primary install command | `bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/main/install/install.sh) --node-name "US-Resi-01" --sni addons.mozilla.org --with-subscription` |
+| Supported server OS | Ubuntu 22.04+ / 24.04 LTS, Debian 12+ |
+| License | GPL-3.0 |
+| Main limitations | 不提供住宅 IP，不做多用户面板/计费，不支持 CentOS 7、Alpine、OpenWRT、Docker-only 或 Kubernetes 部署。 |
+
 ## 中文文档
 
 - [新手完整教程](zh-CN/BEGINNER_GUIDE.md): 从买 VPS 前检查、SSH、`--dry-run`、正式安装、保存订阅 URL、客户端导入到 OpenAI/IP 验证。

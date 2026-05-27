@@ -129,6 +129,11 @@ class LeafAccountingTest(unittest.TestCase):
             "2026-05-11",
         )
 
+    def test_http_server_limits_abandoned_clients(self) -> None:
+        self.assertTrue(self.leaf.TimeoutThreadingHTTPServer.daemon_threads)
+        self.assertEqual(self.leaf.TimeoutThreadingHTTPServer.request_queue_size, 64)
+        self.assertGreater(self.leaf.REQUEST_TIMEOUT_SECONDS, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

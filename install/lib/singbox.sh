@@ -52,7 +52,12 @@ Signed-By: /etc/apt/keyrings/sagernet.asc
 EOF
 
   run env DEBIAN_FRONTEND=noninteractive apt-get update -qq
-  run env DEBIAN_FRONTEND=noninteractive apt-get -y -qq install sing-box
+  local pkg=sing-box
+  if [[ -n "${SINGBOX_VERSION:-}" ]]; then
+    pkg="sing-box=${SINGBOX_VERSION}"
+    info "Pinning sing-box apt package version: ${SINGBOX_VERSION}"
+  fi
+  run env DEBIAN_FRONTEND=noninteractive apt-get -y -qq install "$pkg"
 
   if [[ "$DRY_RUN" != "1" ]]; then
     sing-box version | head -1 | while read -r line; do ok "$line"; done

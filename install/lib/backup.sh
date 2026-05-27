@@ -35,7 +35,9 @@ trap 'rm -rf "$TMP"' EXIT
 
 tar -czf "$OUT" -C / --ignore-failed-read \
   --exclude=var/lib/reality-resi-stack/usage-state.json \
+  --exclude=var/lib/reality-resi-stack/usage-state.tmp \
   --exclude=var/lib/reality-resi-stack/usage-cache.json \
+  --exclude=var/lib/reality-resi-stack/usage-cache.tmp \
   etc/sing-box \
   etc/systemd/system/sing-box.service \
   etc/systemd/system/subscription-leaf.service \

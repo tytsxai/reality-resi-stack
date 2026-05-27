@@ -6,13 +6,20 @@ requires-python = ">=3.10"
 readme = "README.md"
 license = { text = "GPL-3.0-only" }
 keywords = [
-  "sing-box",
-  "vless",
+  "chatgpt",
+  "clash",
+  "debian",
+  "dual-node",
+  "openai",
+  "proxy",
   "reality",
   "residential-ip",
+  "sing-box",
   "subscription-server",
-  "clash",
-  "proxy",
+  "ubuntu",
+  "usage-card",
+  "vless",
+  "vless-reality",
 ]
 classifiers = [
   "Development Status :: 4 - Beta",

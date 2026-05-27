@@ -111,6 +111,11 @@ class AggregatorCacheTest(unittest.TestCase):
         self.assertEqual(used, 12)
         self.assertEqual(meta["source"], "fallback")
 
+    def test_http_server_limits_abandoned_clients(self) -> None:
+        self.assertTrue(self.aggregator.TimeoutThreadingHTTPServer.daemon_threads)
+        self.assertEqual(self.aggregator.TimeoutThreadingHTTPServer.request_queue_size, 64)
+        self.assertGreater(self.aggregator.REQUEST_TIMEOUT_SECONDS, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

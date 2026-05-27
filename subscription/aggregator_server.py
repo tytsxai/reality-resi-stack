@@ -20,6 +20,7 @@ All configuration is via environment; see
 from __future__ import annotations
 
 import json
+import logging
 import os
 import threading
 import time
@@ -28,6 +29,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import unquote
 from urllib.request import Request, urlopen
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+log = logging.getLogger("aggregator")
 
 HOST = os.environ.get("HOST", "0.0.0.0")
 PORT = int(os.environ.get("PORT", "80"))
@@ -47,6 +51,7 @@ PROFILE_TITLE = os.environ.get("PROFILE_TITLE", "Reality-Residential-Dual")
 UPDATE_INTERVAL_HOURS = os.environ.get("UPDATE_INTERVAL_HOURS", "24")
 REMOTE_STATUS_URL = os.environ.get("REMOTE_STATUS_URL", "")
 REMOTE_TIMEOUT_SECONDS = float(os.environ.get("REMOTE_TIMEOUT_SECONDS", "3"))
+REQUEST_TIMEOUT_SECONDS = float(os.environ.get("REQUEST_TIMEOUT_SECONDS", "10"))
 
 CONTENT_TYPES = {
     ".yaml": "text/yaml; charset=utf-8",
@@ -239,19 +244,36 @@ class AggregatorHandler(BaseHTTPRequestHandler):
             self.wfile.write(payload)
 
     def log_message(self, fmt: str, *args) -> None:  # noqa: A003
-        print(f"{self.address_string()} - {fmt % args}", flush=True)
+        log.info("%s - %s", self.address_string(), fmt % args)
+
+
+class TimeoutThreadingHTTPServer(ThreadingHTTPServer):
+    daemon_threads = True
+    allow_reuse_address = True
+    request_queue_size = 64
+
+    def get_request(self):  # type: ignore[no-untyped-def]
+        sock, addr = super().get_request()
+        sock.settimeout(REQUEST_TIMEOUT_SECONDS)
+        return sock, addr
 
 
 def main() -> None:
     start_remote_polling()
-    server = ThreadingHTTPServer((HOST, PORT), AggregatorHandler)
-    print(f"listening on {HOST}:{PORT}", flush=True)
+    server = TimeoutThreadingHTTPServer((HOST, PORT), AggregatorHandler)
+    log.info("listening on %s:%s", HOST, PORT)
     server.serve_forever()
 
 
 def remote_poll_loop() -> None:
     while True:
-        refresh_usage_cache()
+        _used_bytes, meta = refresh_usage_cache()
+        if meta.get("source") != "remote_status":
+            log.warning(
+                "remote status poll used %s: %s",
+                meta.get("source"),
+                meta.get("error", "no error detail"),
+            )
         time.sleep(max(5, REMOTE_POLL_INTERVAL_SECONDS))
 
 

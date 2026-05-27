@@ -68,7 +68,7 @@
 对比依据来自公开项目说明和官方文档：
 
 - [3x-ui README](https://github.com/MHSanaei/3x-ui)：Web-based Xray-core control panel、多协议、多用户、流量/到期/IP 限制、一行安装。
-- [x-ui README](https://github.com/alireza0/x-ui)：Xray 面板、多协议、多入站/客户端、流量状态、订阅和 API 能力。
+- [x-ui README](https://github.com/sing-web/x-ui)：Xray 面板、多协议、多入站/客户端、流量状态、订阅和 API 能力。
 - [Project X 官方文档](https://xtls.github.io/)：VLESS、XTLS、REALITY 和 routing 是 Xray 生态的核心能力。
 - [sing-box route 文档](https://sing-box.sagernet.org/configuration/route/)：route 规则支持按域名、IP、端口、协议等维度把连接送到不同 outbound。
 

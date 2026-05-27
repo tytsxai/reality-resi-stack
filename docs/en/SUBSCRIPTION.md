@@ -67,6 +67,7 @@ Full reference in `templates/env/subscription-leaf.env.example` and `subscriptio
 | `COUNT_CURRENT_BOOT_ON_INIT` | | Count bytes already present in this boot on first state creation, default `true` |
 | `TOTAL_BYTES` | | Plan quota (display only) |
 | `EXPIRE_TS` | | Plan expiry Unix timestamp; `0` hides it |
+| `REQUEST_TIMEOUT_SECONDS` | | Per-client socket timeout, default `10` |
 
 **Aggregator:**
 
@@ -74,10 +75,12 @@ Full reference in `templates/env/subscription-leaf.env.example` and `subscriptio
 |---|---|---|
 | `TOKEN` | ✓ | Independent of the leaf's token |
 | `REMOTE_STATUS_URL` | ✓ | The leaf's `/status` URL, fetched on every poll |
+| `REMOTE_TIMEOUT_SECONDS` | | Timeout for each leaf status poll, default `3` |
 | `CACHE_FILE` | | Last-known-good remote status |
 | `CACHE_TTL_SECONDS` | | Cache freshness window (default 60) |
 | `REMOTE_POLL_INTERVAL_SECONDS` | | Background leaf polling interval (default follows `CACHE_TTL_SECONDS`) |
 | `FALLBACK_USED_BYTES` | | Fallback when neither cache nor leaf is available |
+| `REQUEST_TIMEOUT_SECONDS` | | Per-client socket timeout, default `10` |
 
 ---
 
@@ -133,7 +136,13 @@ The services are systemd-managed:
 systemctl status subscription-leaf            # single-node
 systemctl status subscription-aggregator      # the aggregator on the DC node
 journalctl -u subscription-leaf -n 50 --no-pager
+journalctl -u subscription-aggregator -n 50 --no-pager
 ```
+
+Both HTTP servers set a per-client socket timeout and use daemon worker threads.
+This keeps abandoned or very slow subscription clients from holding the public
+`:80` service indefinitely. If you are behind a very slow reverse proxy, raise
+`REQUEST_TIMEOUT_SECONDS` in the service env file and restart the service.
 
 Run locally without systemd (for development):
 

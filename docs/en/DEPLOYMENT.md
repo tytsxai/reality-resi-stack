@@ -62,6 +62,10 @@ bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/m
 ```
 
 The script clones the repo to `/opt/reality-resi-stack/` and execs the full installer. Every phase prints progress.
+Before touching the machine, the installer validates ports, counters, billing
+cycle day, hostnames, interface names, booleans, and the rendered profile host.
+If public IP auto-detection fails, set `SERVER_IP` in `--config`; otherwise the
+client profile would be rendered with an unusable empty server.
 
 Remote-piped installs default to `main`. To pin a branch or tag, choose a published tag from [Releases](https://github.com/tytsxai/reality-resi-stack/releases), then run:
 
@@ -174,6 +178,19 @@ sing-box check -C /etc/sing-box/conf
 ```
 
 If you're jumping multiple major versions, check the upstream [sing-box release notes](https://github.com/SagerNet/sing-box/releases) for schema breakage. The CHANGELOG.md in this repo records compatibility-tested versions.
+
+For new installs that must stay on a known package build, pass the exact apt
+package version:
+
+```bash
+bash /opt/reality-resi-stack/install/install.sh \
+  --node-name "US-Resi-01" \
+  --with-subscription \
+  --singbox-version "<apt-package-version>"
+```
+
+If the version is not available in the Sagernet apt repository, `apt-get`
+fails before any sing-box service is started.
 
 ---
 

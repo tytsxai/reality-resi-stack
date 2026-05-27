@@ -68,7 +68,7 @@ Do not use `reality-resi-stack` for every problem:
 The comparison uses public project descriptions and official docs:
 
 - [3x-ui README](https://github.com/MHSanaei/3x-ui): web-based Xray-core control panel, multi-protocol support, multi-user management, traffic/expiry/IP limits, one-line install.
-- [x-ui README](https://github.com/alireza0/x-ui): Xray panel, multi-protocol and multi-inbound/client management, traffic status, subscription and API features.
+- [x-ui README](https://github.com/sing-web/x-ui): Xray panel, multi-protocol and multi-inbound/client management, traffic status, subscription and API features.
 - [Project X docs](https://xtls.github.io/): VLESS, XTLS, REALITY, and routing are core Xray ecosystem capabilities.
 - [sing-box route docs](https://sing-box.sagernet.org/configuration/route/): route rules can send traffic to different outbounds by domain, IP, port, protocol, and related matchers.
 

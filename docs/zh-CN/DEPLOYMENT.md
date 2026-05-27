@@ -64,6 +64,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/tytsxai/reality-resi-stack/m
 ```
 
 脚本会自己 clone 仓库到 `/opt/reality-resi-stack/`，再 exec 完整安装器。所有阶段都在屏幕上有进度。
+真正改机器之前，安装器会先校验端口、流量数值、账期日、主机名、网卡名、布尔开关和用于渲染客户端配置的出口地址。
+如果公网 IP 自动探测失败，请在 `--config` 文件里设置 `SERVER_IP`；否则客户端配置会被渲染成不可用的空 server。
 
 默认拉取 `main`。如果你要固定某个分支或 tag，先到 [Releases](https://github.com/tytsxai/reality-resi-stack/releases) 选一个已发布 tag，再用：
 
@@ -176,6 +178,17 @@ sing-box check -C /etc/sing-box/conf
 ```
 
 如果版本不在仓库锁定范围内（仓库 CI 会定期 bump），先看 [CHANGELOG.md](../../CHANGELOG.md) 确认兼容性。
+
+如果新装时必须固定在某个已知 apt 包版本，可以传精确版本：
+
+```bash
+bash /opt/reality-resi-stack/install/install.sh \
+  --node-name "US-Resi-01" \
+  --with-subscription \
+  --singbox-version "<apt-package-version>"
+```
+
+如果 Sagernet apt 仓库里没有这个版本，`apt-get` 会直接失败，不会继续启动 sing-box 服务。
 
 ---
 
