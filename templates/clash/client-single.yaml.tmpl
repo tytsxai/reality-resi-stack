@@ -4,6 +4,9 @@ allow-lan: false
 mode: rule
 log-level: info
 unified-delay: true
+# No public IPv6 on most residential/DC VPS exits — disabling IPv6 here stops
+# the client handing unreachable IPv6 targets to the node (stalls, timeouts).
+ipv6: false
 
 proxies:
   - name: @@NODE_NAME@@
@@ -13,6 +16,7 @@ proxies:
     uuid: @@UUID@@
     network: tcp
     udp: true
+    tfo: true
     tls: true
     flow: xtls-rprx-vision
     servername: @@SNI@@

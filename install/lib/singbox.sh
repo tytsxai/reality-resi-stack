@@ -140,6 +140,42 @@ phase_configure_singbox() {
     "$conf/11_xtls-reality_inbounds.json" \
     0644
 
+  # IPv6 dead-route guard. On hosts with NO public IPv6 default route, any
+  # client-passed IPv6 literal target is unreachable and otherwise spams
+  # "network is unreachable" while connections stall. Fast-reject those.
+  # Hosts that DO have an IPv6 default route are left untouched so real IPv6
+  # egress keeps working — the rule is opt-in by environment, never forced.
+  if [[ "$DRY_RUN" == "1" ]]; then
+    info "[dry] would add IPv6 fast-reject rule when no IPv6 default route exists"
+  elif ip -6 route show default 2>/dev/null | grep -q .; then
+    info "IPv6 default route present — leaving IPv6 egress enabled"
+  else
+    info "No IPv6 default route — adding fast-reject rule for IPv6 targets"
+    python3 - "$conf/03_route.json" <<'PY'
+import json
+import sys
+
+path = sys.argv[1]
+with open(path, encoding="utf-8") as handle:
+    cfg = json.load(handle)
+
+rules = cfg.setdefault("route", {}).setdefault("rules", [])
+guard = {"action": "reject", "ip_version": 6}
+if guard not in rules:
+    # Keep the sniff rule first; insert the guard right after it.
+    insert_at = 0
+    for i, rule in enumerate(rules):
+        if rule.get("action") == "sniff":
+            insert_at = i + 1
+            break
+    rules.insert(insert_at, guard)
+
+with open(path, "w", encoding="utf-8") as handle:
+    json.dump(cfg, handle, indent=2)
+    handle.write("\n")
+PY
+  fi
+
   if [[ "$DRY_RUN" != "1" ]]; then
     sing-box check -C "$conf" || die "sing-box config check failed"
     ok "Config validates"

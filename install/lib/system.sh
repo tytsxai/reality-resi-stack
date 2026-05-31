@@ -91,10 +91,12 @@ phase_system_init() {
     ok "Timezone: $TIMEZONE"
   fi
 
-  step "Enabling BBR"
+  step "Enabling BBR + TCP fast open + MTU probing"
   write_file /etc/sysctl.d/99-bbr.conf 0644 <<'EOF'
 net.core.default_qdisc=fq
 net.ipv4.tcp_congestion_control=bbr
+net.ipv4.tcp_fastopen=3
+net.ipv4.tcp_mtu_probing=1
 EOF
   run sysctl --system >/dev/null
   if [[ "$DRY_RUN" != "1" ]]; then

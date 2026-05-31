@@ -5,6 +5,7 @@
       "tag": "vless-reality-443",
       "listen": "::",
       "listen_port": 443,
+      "tcp_fast_open": true,
       "users": [
         {
           "uuid": "00000000-0000-0000-0000-000000000000",

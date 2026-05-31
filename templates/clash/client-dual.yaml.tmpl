@@ -20,6 +20,9 @@ allow-lan: false
 mode: rule
 log-level: info
 unified-delay: true
+# No public IPv6 on most residential/DC VPS exits — disabling IPv6 here stops
+# the client handing unreachable IPv6 targets to a node (stalls, timeouts).
+ipv6: false
 
 proxies:
   - name: @@RESI_NODE_NAME@@
@@ -29,6 +32,7 @@ proxies:
     uuid: @@RESI_UUID@@
     network: tcp
     udp: true
+    tfo: true
     tls: true
     flow: xtls-rprx-vision
     servername: @@RESI_SNI@@
@@ -44,6 +48,7 @@ proxies:
     uuid: @@DC_UUID@@
     network: tcp
     udp: true
+    tfo: true
     tls: true
     flow: xtls-rprx-vision
     servername: @@DC_SNI@@
@@ -70,7 +75,10 @@ proxy-groups:
     proxies:
       - @@RESI_NODE_NAME@@
       - @@DC_NODE_NAME@@
-    url: https://www.gstatic.com/generate_204
+    # Probe real OpenAI API reachability (401 = reached) rather than a generic
+    # 204 endpoint, so latency reflects the link clients actually care about.
+    url: https://api.openai.com/v1/models
+    expected-status: 401
     interval: 300
     lazy: false
 
